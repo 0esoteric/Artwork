@@ -23,6 +23,7 @@ interface ProductDetailProps {
     comparePrice: number | null
     artist: string
     artistSlug: string
+    artistBio?: string | null
     artForm: string
     dimensions: string
     medium: string
@@ -31,6 +32,12 @@ interface ProductDetailProps {
     isBestseller: boolean
     stockQuantity: number
     tags: string[]
+    // New fields
+    shipmentTime?: string
+    couponCode?: string | null
+    couponDiscount?: number
+    shippingDetails?: string
+    returnPolicy?: string
   }
 }
 
@@ -232,13 +239,27 @@ export function ProductDetail({ product }: ProductDetailProps) {
               <>
                 <Check className="h-5 w-5 text-accent" />
                 <span className="text-sm">
-                  {product.isReadyToShip ? 'In stock - Ships in 3-4 days' : 'Made to order - Ships in 15-20 days'}
+                  {product.isReadyToShip 
+                    ? `In stock - Ships in ${product.shipmentTime || '3-4 days'}` 
+                    : `Made to order - ${product.shipmentTime || 'Ships in 15-20 days'}`
+                  }
                 </span>
               </>
             ) : (
               <span className="text-sm text-destructive">Out of stock</span>
             )}
           </div>
+
+          {/* Coupon Code Display */}
+          {product.couponCode && product.couponDiscount && product.couponDiscount > 0 && (
+            <div className="mb-6 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+              <p className="text-sm">
+                <span className="font-medium">Use code </span>
+                <code className="px-2 py-0.5 bg-primary/10 rounded text-primary font-bold">{product.couponCode}</code>
+                <span className="font-medium"> for {product.couponDiscount}% off!</span>
+              </p>
+            </div>
+          )}
 
           {/* Quantity & Add to Cart */}
           <div className="flex flex-wrap gap-4 mb-6">
@@ -359,20 +380,16 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
           <TabsContent value="artist" className="mt-6">
             <div className="flex items-start gap-6">
-              <div className="relative w-24 h-24 rounded-full overflow-hidden flex-shrink-0">
-                <Image
-                  src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80"
-                  alt={product.artist}
-                  fill
-                  className="object-cover"
-                />
+              <div className="relative w-24 h-24 rounded-full overflow-hidden flex-shrink-0 bg-muted flex items-center justify-center">
+                <span className="text-3xl font-serif font-bold text-muted-foreground">
+                  {product.artist.charAt(0)}
+                </span>
               </div>
               <div>
                 <h3 className="text-xl font-serif font-bold mb-2">{product.artist}</h3>
                 <p className="text-primary font-medium text-sm mb-2">{product.artForm} Artist</p>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  A renowned {product.artForm} artist with decades of experience, known for intricate patterns and vibrant colors. 
-                  Each artwork is a unique expression of traditional techniques passed down through generations.
+                  {product.artistBio || `A renowned ${product.artForm} artist with decades of experience, known for intricate patterns and vibrant colors. Each artwork is a unique expression of traditional techniques passed down through generations.`}
                 </p>
                 <Button asChild variant="outline">
                   <Link href={`/artists/${product.artistSlug}`}>
@@ -386,22 +403,16 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <TabsContent value="shipping" className="mt-6 space-y-4">
             <div>
               <h4 className="font-semibold mb-2">Shipping</h4>
-              <ul className="text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Free shipping on orders above Rs. 5,000</li>
-                <li>Ready to ship items dispatch within 3-4 business days</li>
-                <li>Made to order items ship within 15-20 business days</li>
-                <li>All artworks are carefully packaged to ensure safe delivery</li>
-              </ul>
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                {product.shippingDetails || 'Free shipping on orders above Rs. 5,000. Ready to ship items dispatch within 3-4 business days. Made to order items ship within 15-20 business days. All artworks are carefully packaged to ensure safe delivery.'}
+              </p>
             </div>
             <Separator />
             <div>
               <h4 className="font-semibold mb-2">Returns & Exchanges</h4>
-              <ul className="text-muted-foreground space-y-1 list-disc list-inside">
-                <li>14-day return policy for all products</li>
-                <li>Items must be returned in original packaging</li>
-                <li>Refunds processed within 7 business days</li>
-                <li>Contact support for any issues with your order</li>
-              </ul>
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                {product.returnPolicy || '14-day return policy for all products. Items must be returned in original packaging. Refunds processed within 7 business days. Contact support for any issues with your order.'}
+              </p>
             </div>
           </TabsContent>
         </Tabs>

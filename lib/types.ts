@@ -58,10 +58,18 @@ export interface Product {
   is_active: boolean
   created_at: Date
   updated_at: Date
+  // New enhanced fields
+  shipment_time?: string
+  coupon_code?: string
+  coupon_discount?: number
+  about_artist?: string
+  shipping_details?: string
+  return_policy?: string
   // Joined fields
   category_name?: string
   artist_name?: string
   images?: ProductImage[]
+  image?: string // Primary image URL for convenience
 }
 
 export interface ProductImage {

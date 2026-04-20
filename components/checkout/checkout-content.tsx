@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { CreditCard, Truck, Shield, ChevronLeft, Check } from 'lucide-react'
+import { CreditCard, Truck, Shield, ChevronLeft, Check, Package, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,6 +13,11 @@ import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useCartStore } from '@/lib/cart-store'
 import { toast } from 'sonner'
+import useSWR from 'swr'
+
+const PLACEHOLDER_IMAGE = "/placeholder.svg"
+
+const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('en-IN', {
@@ -63,6 +68,9 @@ export function CheckoutContent() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [step, setStep] = useState<'shipping' | 'payment'>('shipping')
   
+  // Check if user is logged in
+  const { data: sessionData, isLoading: isCheckingAuth } = useSWR('/api/auth/session', fetcher)
+  
   const [shippingData, setShippingData] = useState({
     firstName: '',
     lastName: '',
@@ -87,16 +95,31 @@ export function CheckoutContent() {
     }
   }, [])
 
-  if (!mounted) {
+  if (!mounted || isCheckingAuth) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse">
-          <div className="h-10 w-48 bg-muted rounded mb-8" />
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div className="h-96 bg-card rounded-lg" />
-            </div>
-            <div className="h-80 bg-card rounded-lg" />
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    )
+  }
+
+  // Redirect to login if not authenticated
+  if (!sessionData?.user) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center py-16">
+          <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <h2 className="text-2xl font-serif font-bold mb-2">Please Sign In</h2>
+          <p className="text-muted-foreground mb-6">You need to be signed in to complete your purchase.</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button asChild size="lg">
+              <Link href="/login?redirect=/checkout">Sign In</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/signup?redirect=/checkout">Create Account</Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -457,12 +480,22 @@ export function CheckoutContent() {
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4">
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                    />
+                    {item.image ? (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.src = PLACEHOLDER_IMAGE
+                        }}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full w-full">
+                        <Package className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    )}
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
                       {item.quantity}
                     </span>

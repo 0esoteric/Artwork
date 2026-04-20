@@ -206,14 +206,37 @@ export function OrdersContent() {
                 <div className="p-4">
                   <div className="flex items-center gap-4">
                     <div className="flex -space-x-3 overflow-hidden">
-                      {/* We'd need to fetch items for each order, but for now we show count */}
-                      <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border-2 border-card">
-                        <Package className="h-6 w-6 text-muted-foreground" />
-                      </div>
+                      {order.items && order.items.length > 0 ? (
+                        order.items.slice(0, 3).map((item: any, idx: number) => (
+                          <div key={item.id} className="relative w-12 h-12 rounded-lg bg-muted border-2 border-card overflow-hidden" style={{ zIndex: 3 - idx }}>
+                            {item.product_image ? (
+                              <Image
+                                src={item.product_image}
+                                alt={item.product_name}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full w-full">
+                                <Package className="h-6 w-6 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border-2 border-card">
+                          <Package className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      {order.items && order.items.length > 3 && (
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border-2 border-card text-xs font-medium">
+                          +{order.items.length - 3}
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium">
-                        {order.item_count} {order.item_count === 1 ? 'item' : 'items'}
+                        {order.item_count || order.items?.length || 0} {(order.item_count || order.items?.length || 0) === 1 ? 'item' : 'items'}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Payment: <span className="uppercase">{order.payment_method}</span> ({order.payment_status})

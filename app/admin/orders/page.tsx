@@ -124,10 +124,12 @@ const mockOrders = [
 ]
 const statusConfig = {
   pending: { label: "Pending", icon: Clock, color: "bg-yellow-100 text-yellow-700" },
-  processing: { label: "Processing", icon: Package, color: "bg-blue-100 text-blue-700" },
+  confirmed: { label: "Confirmed", icon: CheckCircle, color: "bg-blue-100 text-blue-700" },
+  processing: { label: "Processing", icon: Package, color: "bg-indigo-100 text-indigo-700" },
   shipped: { label: "Shipped", icon: Truck, color: "bg-purple-100 text-purple-700" },
   delivered: { label: "Delivered", icon: CheckCircle, color: "bg-green-100 text-green-700" },
   cancelled: { label: "Cancelled", icon: XCircle, color: "bg-red-100 text-red-700" },
+  refunded: { label: "Refunded", icon: XCircle, color: "bg-gray-100 text-gray-700" },
 }
 
 export default function AdminOrdersPage() {
@@ -376,6 +378,28 @@ export default function AdminOrdersPage() {
                   <p className="text-sm text-muted-foreground">{selectedOrder.shipping_phone}</p>
                 </div>
               </div>
+              
+              {/* Order Items */}
+              {selectedOrder.items && selectedOrder.items.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Order Items</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {selectedOrder.items.map((item: any) => (
+                      <div key={item.id} className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
+                        <div className="w-10 h-10 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                          <Package className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item.product_name}</p>
+                          <p className="text-xs text-muted-foreground">Qty: {item.quantity} x {formatPrice(item.price)}</p>
+                        </div>
+                        <p className="font-medium text-sm">{formatPrice(item.total)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground mb-1">Total Amount</h4>

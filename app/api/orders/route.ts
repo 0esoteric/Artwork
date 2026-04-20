@@ -82,7 +82,7 @@ export async function GET() {
   }
 
   try {
-    const orders = await query(
+    const orders: any[] = await query(
       `SELECT o.*, COUNT(oi.id) as item_count 
        FROM orders o 
        LEFT JOIN order_items oi ON o.id = oi.order_id 
@@ -91,6 +91,16 @@ export async function GET() {
        ORDER BY o.created_at DESC`,
       [session.user.id]
     )
+    
+    // Fetch items for each order
+    for (const order of orders) {
+      const items = await query(
+        `SELECT * FROM order_items WHERE order_id = ?`,
+        [order.id]
+      )
+      order.items = items
+    }
+    
     return NextResponse.json({ orders })
   } catch (error) {
     console.error('Failed to fetch orders:', error)

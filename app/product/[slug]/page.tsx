@@ -7,10 +7,12 @@ import { RelatedProducts } from '@/components/product/related-products'
 // Mock product data - in production, fetch from database
 import { query } from '@/lib/db'
 
+const PLACEHOLDER_IMAGE = "/placeholder.svg"
+
 async function getProduct(slug: string) {
   try {
     const products: any[] = await query(
-      `SELECT p.*, c.name as category_name, a.name as artist_name, a.slug as artist_slug
+      `SELECT p.*, c.name as category_name, a.name as artist_name, a.slug as artist_slug, a.bio as artist_bio
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
        LEFT JOIN artists a ON p.artist_id = a.id
@@ -38,9 +40,10 @@ async function getProduct(slug: string) {
 
     return {
       ...product,
-      images: images.length > 0 ? images.map(img => img.image_url) : ['https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80'],
+      images: images.length > 0 ? images.map(img => img.image_url) : [PLACEHOLDER_IMAGE],
       artist: product.artist_name || 'Artisan Haven',
       artistSlug: product.artist_slug || 'artisan-haven',
+      artistBio: product.about_artist || product.artist_bio || null,
       artForm: product.art_form || 'Handmade',
       medium: product.medium || 'Traditional',
       dimensions: product.dimensions || 'Standard',
@@ -49,6 +52,13 @@ async function getProduct(slug: string) {
       isReadyToShip: Boolean(product.is_ready_to_ship),
       isBestseller: Boolean(product.is_featured),
       stockQuantity: product.stock_quantity || 0,
+      // New fields
+      shipmentTime: product.shipment_time || '7-10 business days',
+      couponCode: product.coupon_code || null,
+      couponDiscount: product.coupon_discount || 0,
+      shippingDetails: product.shipping_details || 'Free shipping on orders above Rs. 999. Standard delivery within 7-10 business days.',
+      returnPolicy: product.return_policy || '7-day return policy. Items must be unused and in original packaging.',
+      comparePrice: product.compare_price || null,
     }
   } catch (error) {
     console.error('Failed to fetch product:', error)

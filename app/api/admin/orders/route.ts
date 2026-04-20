@@ -13,12 +13,23 @@ export async function GET() {
   }
 
   try {
-    const orders = await query(`
-      SELECT o.*, u.name as user_name, u.email as user_email
+    const orders: any[] = await query(`
+      SELECT o.*, u.name as user_name, u.email as user_email,
+             (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as item_count
       FROM orders o
       JOIN users u ON o.user_id = u.id
       ORDER BY o.created_at DESC
     `)
+    
+    // Fetch items for each order
+    for (const order of orders) {
+      const items = await query(
+        `SELECT * FROM order_items WHERE order_id = ?`,
+        [order.id]
+      )
+      order.items = items
+    }
+    
     return NextResponse.json({ orders })
   } catch (error) {
     console.error('Failed to fetch admin orders:', error)

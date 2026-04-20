@@ -1,77 +1,20 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, ShoppingBag } from 'lucide-react'
+import { Heart, ShoppingBag, Package, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+import { useCartStore } from '@/lib/cart-store'
+import { useWishlistStore } from '@/lib/wishlist-store'
+import { toast } from 'sonner'
+import useSWR from 'swr'
 
-// Mock related products
-const allProducts = [
-  {
-    id: 1,
-    name: 'Tree of Life in Madhubani',
-    slug: 'tree-of-life-madhubani',
-    price: 15000,
-    comparePrice: 18000,
-    artist: 'Ambika Devi',
-    artForm: 'Madhubani',
-    dimensions: '24 in X 36 in',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: true,
-  },
-  {
-    id: 2,
-    name: 'Dancing Peacocks in Gond',
-    slug: 'dancing-peacocks-gond',
-    price: 12000,
-    comparePrice: null,
-    artist: 'Sandeep Dhurve',
-    artForm: 'Gond',
-    dimensions: '20 in X 30 in',
-    image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: false,
-  },
-  {
-    id: 3,
-    name: 'Village Life Warli',
-    slug: 'village-life-warli',
-    price: 8500,
-    comparePrice: 10000,
-    artist: 'Dilip Bahotha',
-    artForm: 'Warli',
-    dimensions: '18 in X 24 in',
-    image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: false,
-  },
-  {
-    id: 4,
-    name: 'Krishna Leela Pichwai',
-    slug: 'krishna-leela-pichwai',
-    price: 45000,
-    comparePrice: 52000,
-    artist: 'Master Artist',
-    artForm: 'Pichwai',
-    dimensions: '36 in X 48 in',
-    image: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&q=80',
-    isReadyToShip: false,
-    isBestseller: true,
-  },
-  {
-    id: 7,
-    name: 'Fish Motif Madhubani',
-    slug: 'fish-motif-madhubani',
-    price: 5500,
-    comparePrice: 6500,
-    artist: 'Ambika Devi',
-    artForm: 'Madhubani',
-    dimensions: '12 in X 16 in',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: false,
-  },
-]
+const PLACEHOLDER_IMAGE = "/placeholder.svg"
+
+const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('en-IN', {
@@ -87,10 +30,32 @@ interface RelatedProductsProps {
 }
 
 export function RelatedProducts({ currentProductId, artForm }: RelatedProductsProps) {
+  const { data, isLoading } = useSWR(`/api/products?artForm=${encodeURIComponent(artForm)}`, fetcher)
+  const { addItem } = useCartStore()
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  
   // Filter to show related products (same art form, excluding current)
-  const relatedProducts = allProducts
-    .filter(p => p.id !== currentProductId)
+  const relatedProducts = (data?.products || [])
+    .filter((p: any) => p.id !== currentProductId)
     .slice(0, 4)
+
+  if (isLoading) {
+    return (
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl md:text-3xl font-serif font-bold">You May Also Like</h2>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </section>
+    )
+  }
 
   if (relatedProducts.length === 0) return null
 
@@ -104,24 +69,47 @@ export function RelatedProducts({ currentProductId, artForm }: RelatedProductsPr
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {relatedProducts.map((product) => {
-          const discount = product.comparePrice 
-            ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
+        {relatedProducts.map((product: any) => {
+          const discount = product.compare_price 
+            ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)
             : null
+
+          const isWishlisted = mounted ? isInWishlist(product.id) : false
+
+          const toggleWishlist = (e: React.MouseEvent) => {
+            e.preventDefault()
+            if (isWishlisted) {
+              removeFromWishlist(product.id)
+              toast.success('Removed from wishlist')
+            } else {
+              addToWishlist(product)
+              toast.success('Added to wishlist')
+            }
+          }
 
           return (
             <div key={product.id} className="group">
               <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-muted">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+                {product.image ? (
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.src = PLACEHOLDER_IMAGE
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full w-full">
+                    <Package className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
                 
                 {/* Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-2">
-                  {product.isReadyToShip && (
+                  {product.is_ready_to_ship && (
                     <Badge className="bg-accent text-accent-foreground text-xs">
                       Ready to Ship
                     </Badge>
@@ -135,23 +123,37 @@ export function RelatedProducts({ currentProductId, artForm }: RelatedProductsPr
 
                 {/* Quick Actions */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full shadow-md">
-                    <Heart className="h-4 w-4" />
+                  <Button 
+                    size="icon" 
+                    variant="secondary" 
+                    className="h-9 w-9 rounded-full shadow-md"
+                    onClick={toggleWishlist}
+                  >
+                    <Heart className={cn("h-4 w-4", isWishlisted && "fill-destructive text-destructive")} />
                   </Button>
                 </div>
 
                 {/* Add to Cart */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform">
-                  <Button className="w-full gap-2" size="sm">
+                  <Button 
+                    className="w-full gap-2" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      addItem(product)
+                      toast.success(`${product.name} added to cart`)
+                    }}
+                    disabled={product.stock_quantity === 0}
+                  >
                     <ShoppingBag className="h-4 w-4" />
-                    Add to Cart
+                    {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
                   </Button>
                 </div>
               </div>
 
               <div className="mt-4 space-y-1">
                 <p className="text-xs text-primary font-medium uppercase tracking-wider">
-                  {product.artForm}
+                  {product.art_form || product.category_name || 'Handmade'}
                 </p>
                 <Link href={`/product/${product.slug}`}>
                   <h3 className="font-medium text-foreground hover:text-primary transition-colors line-clamp-2">
@@ -159,13 +161,13 @@ export function RelatedProducts({ currentProductId, artForm }: RelatedProductsPr
                   </h3>
                 </Link>
                 <p className="text-sm text-muted-foreground">
-                  by {product.artist}
+                  by {product.artist_name || 'Artisan Haven'}
                 </p>
                 <div className="flex items-center gap-2 pt-1">
                   <span className="font-semibold">{formatPrice(product.price)}</span>
-                  {product.comparePrice && (
+                  {product.compare_price && (
                     <span className="text-sm text-muted-foreground line-through">
-                      {formatPrice(product.comparePrice)}
+                      {formatPrice(product.compare_price)}
                     </span>
                   )}
                 </div>

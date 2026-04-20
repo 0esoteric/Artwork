@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { query } from "@/lib/db"
 
+const PLACEHOLDER_IMAGE = "/placeholder.svg"
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q') || ''
@@ -13,9 +15,14 @@ export async function GET(request: Request) {
 
   try {
     let sql = `
-      SELECT p.*, pi.image_url as image 
+      SELECT p.*, 
+             COALESCE(pi.image_url, '${PLACEHOLDER_IMAGE}') as image,
+             c.name as category_name,
+             a.name as artist_name
       FROM products p 
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = 1
+      LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN artists a ON p.artist_id = a.id
       WHERE p.is_active = 1
     `
     const params: any[] = []

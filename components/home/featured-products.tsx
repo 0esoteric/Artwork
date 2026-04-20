@@ -3,118 +3,18 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, ShoppingBag, Eye } from 'lucide-react'
+import { Heart, ShoppingBag, Eye, Package, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { useCartStore } from '@/lib/cart-store'
+import { useWishlistStore } from '@/lib/wishlist-store'
+import { useToast } from '@/hooks/use-toast'
+import useSWR from 'swr'
 
-// Mock featured products - in production, fetch from API
-const featuredProducts = [
-  {
-    id: 1,
-    name: 'Tree of Life in Madhubani',
-    slug: 'tree-of-life-madhubani',
-    price: 15000,
-    comparePrice: 18000,
-    artist: 'Ambika Devi',
-    artForm: 'Madhubani',
-    dimensions: '24 in X 36 in',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: true,
-  },
-  {
-    id: 2,
-    name: 'Dancing Peacocks in Gond',
-    slug: 'dancing-peacocks-gond',
-    price: 12000,
-    comparePrice: null,
-    artist: 'Sandeep Dhurve',
-    artForm: 'Gond',
-    dimensions: '20 in X 30 in',
-    image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: false,
-  },
-  {
-    id: 3,
-    name: 'Village Life Warli',
-    slug: 'village-life-warli',
-    price: 8500,
-    comparePrice: 10000,
-    artist: 'Dilip Bahotha',
-    artForm: 'Warli',
-    dimensions: '18 in X 24 in',
-    image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: false,
-  },
-  {
-    id: 4,
-    name: 'Krishna Leela Pichwai',
-    slug: 'krishna-leela-pichwai',
-    price: 45000,
-    comparePrice: 52000,
-    artist: 'Master Artist',
-    artForm: 'Pichwai',
-    dimensions: '36 in X 48 in',
-    image: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&q=80',
-    isReadyToShip: false,
-    isBestseller: true,
-  },
-  {
-    id: 5,
-    name: 'Mythological Kalamkari',
-    slug: 'mythological-kalamkari',
-    price: 28000,
-    comparePrice: null,
-    artist: 'Harinath N',
-    artForm: 'Kalamkari',
-    dimensions: '30 in X 40 in',
-    image: 'https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: false,
-  },
-  {
-    id: 6,
-    name: 'Durga in Pattachitra',
-    slug: 'durga-pattachitra',
-    price: 35000,
-    comparePrice: 40000,
-    artist: 'Gitanjali Das',
-    artForm: 'Pattachitra',
-    dimensions: '28 in X 38 in',
-    image: 'https://images.unsplash.com/photo-1549887534-1541e9326642?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: true,
-  },
-  {
-    id: 7,
-    name: 'Fish Motif Madhubani',
-    slug: 'fish-motif-madhubani',
-    price: 5500,
-    comparePrice: 6500,
-    artist: 'Ambika Devi',
-    artForm: 'Madhubani',
-    dimensions: '12 in X 16 in',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&q=80',
-    isReadyToShip: true,
-    isBestseller: false,
-  },
-  {
-    id: 8,
-    name: 'Elephant Gond Art',
-    slug: 'elephant-gond-art',
-    price: 18000,
-    comparePrice: 22000,
-    artist: 'Sandeep Dhurve',
-    artForm: 'Gond',
-    dimensions: '24 in X 30 in',
-    image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&q=80',
-    isReadyToShip: false,
-    isBestseller: true,
-  },
-]
+const PLACEHOLDER_IMAGE = "/placeholder.svg"
+
+const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('en-IN', {
@@ -124,11 +24,7 @@ function formatPrice(price: number) {
   }).format(price)
 }
 
-import { useCartStore } from '@/lib/cart-store'
-import { useWishlistStore } from '@/lib/wishlist-store'
-import { useToast } from '@/hooks/use-toast'
-
-function ProductCard({ product }: { product: typeof featuredProducts[0] }) {
+function ProductCard({ product }: { product: any }) {
   const { addItem } = useCartStore()
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
@@ -157,30 +53,40 @@ function ProductCard({ product }: { product: typeof featuredProducts[0] }) {
     }
   }
 
-  const discount = product.comparePrice 
-    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
+  const discount = product.compare_price 
+    ? Math.round(((product.compare_price - product.price) / product.compare_price) * 100)
     : null
 
   return (
     <div className="group">
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-muted">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement
+              target.src = PLACEHOLDER_IMAGE
+            }}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full w-full">
+            <Package className="h-12 w-12 text-muted-foreground" />
+          </div>
+        )}
         
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {product.isReadyToShip && (
+          {product.is_ready_to_ship && (
             <Badge className="bg-accent text-accent-foreground text-xs">
               Ready to Ship
             </Badge>
           )}
-          {product.isBestseller && (
+          {product.is_featured && (
             <Badge className="bg-primary text-primary-foreground text-xs">
-              Bestseller
+              Featured
             </Badge>
           )}
           {discount && (
@@ -203,9 +109,11 @@ function ProductCard({ product }: { product: typeof featuredProducts[0] }) {
               {mounted ? (isWishlisted ? 'Remove from wishlist' : 'Add to wishlist') : 'Add to wishlist'}
             </span>
           </Button>
-          <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full shadow-md">
-            <Eye className="h-4 w-4" />
-            <span className="sr-only">Quick view</span>
+          <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full shadow-md" asChild>
+            <Link href={`/product/${product.slug}`}>
+              <Eye className="h-4 w-4" />
+              <span className="sr-only">Quick view</span>
+            </Link>
           </Button>
         </div>
 
@@ -221,9 +129,10 @@ function ProductCard({ product }: { product: typeof featuredProducts[0] }) {
                 description: `${product.name} has been added to your cart.`,
               })
             }}
+            disabled={product.stock_quantity === 0}
           >
             <ShoppingBag className="h-4 w-4" />
-            Add to Cart
+            {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
           </Button>
         </div>
       </div>
@@ -231,7 +140,7 @@ function ProductCard({ product }: { product: typeof featuredProducts[0] }) {
       {/* Product Info */}
       <div className="mt-4 space-y-1">
         <p className="text-xs text-primary font-medium uppercase tracking-wider">
-          {product.artForm}
+          {product.art_form || product.category_name || 'Handmade'}
         </p>
         <Link href={`/product/${product.slug}`}>
           <h3 className="font-medium text-foreground hover:text-primary transition-colors line-clamp-2">
@@ -239,18 +148,18 @@ function ProductCard({ product }: { product: typeof featuredProducts[0] }) {
           </h3>
         </Link>
         <p className="text-sm text-muted-foreground">
-          by {product.artist}
+          by {product.artist_name || 'Artisan Haven'}
         </p>
         <p className="text-xs text-muted-foreground">
-          {product.dimensions}
+          {product.dimensions || 'Standard Size'}
         </p>
         <div className="flex items-center gap-2 pt-1">
           <span className="text-lg font-semibold text-foreground">
             {formatPrice(product.price)}
           </span>
-          {product.comparePrice && (
+          {product.compare_price && (
             <span className="text-sm text-muted-foreground line-through">
-              {formatPrice(product.comparePrice)}
+              {formatPrice(product.compare_price)}
             </span>
           )}
         </div>
@@ -260,6 +169,64 @@ function ProductCard({ product }: { product: typeof featuredProducts[0] }) {
 }
 
 export function FeaturedProducts() {
+  const { data, error, isLoading } = useSWR('/api/products?featured=true', fetcher)
+  
+  const products = data?.products || []
+
+  if (isLoading) {
+    return (
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
+            <div>
+              <p className="text-primary font-medium tracking-wider uppercase mb-2">
+                Editor&apos;s Pick
+              </p>
+              <h2 className="text-4xl md:text-5xl font-serif font-bold">
+                Featured Artworks
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (error || products.length === 0) {
+    return (
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
+            <div>
+              <p className="text-primary font-medium tracking-wider uppercase mb-2">
+                Editor&apos;s Pick
+              </p>
+              <h2 className="text-4xl md:text-5xl font-serif font-bold">
+                Featured Artworks
+              </h2>
+            </div>
+            <Link 
+              href="/shop"
+              className="mt-4 sm:mt-0 text-primary font-medium hover:underline underline-offset-4"
+            >
+              View All Artworks
+            </Link>
+          </div>
+          <div className="text-center py-16 text-muted-foreground">
+            <Package className="h-12 w-12 mx-auto mb-4" />
+            <p>No featured products available at the moment.</p>
+            <Button asChild variant="outline" className="mt-4">
+              <Link href="/shop">Browse All Products</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -283,7 +250,7 @@ export function FeaturedProducts() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product) => (
+          {products.slice(0, 8).map((product: any) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

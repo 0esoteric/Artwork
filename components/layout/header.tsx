@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Menu, Search, Heart, ShoppingBag, User, ChevronDown, X } from 'lucide-react'
+import Image from 'next/image'
+import { usePathname, useRouter } from 'next/navigation'
+import { Search, Heart, ShoppingBag, User, Menu, X, ChevronRight, MapPin, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,52 +14,66 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-  SheetClose,
-} from '@/components/ui/sheet'
 import { useCartStore } from '@/lib/cart-store'
 import { useWishlistStore } from '@/lib/wishlist-store'
 import { cn } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
 
-const navigation = [
-  { name: 'New Arrivals', href: '/shop?sort=newest' },
-  { name: 'Shop', href: '/shop' },
-  { 
-    name: 'Categories', 
-    href: '/shop',
-    children: [
-      { name: 'T-Shirts', href: '/shop?category=tshirts' },
-      { name: 'Shirts', href: '/shop?category=shirts' },
-      { name: 'Hoodies', href: '/shop?category=hoodies' },
-      { name: 'Jackets', href: '/shop?category=jackets' },
-      { name: 'Pants', href: '/shop?category=pants' },
-      { name: 'Shorts', href: '/shop?category=shorts' },
-      { name: 'Accessories', href: '/shop?category=accessories' },
-    ]
+const categories = [
+  {
+    name: 'Men',
+    href: '/shop?gender=men',
+    featured: [
+      { name: 'New Arrivals', href: '/shop?gender=men&sort=newest', image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=400&q=80' },
+      { name: 'Best Sellers', href: '/shop?gender=men&featured=true', image: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=400&q=80' },
+    ],
+    links: [
+      { name: 'T-Shirts', href: '/shop?gender=men&category=tshirts' },
+      { name: 'Shirts', href: '/shop?gender=men&category=shirts' },
+      { name: 'Hoodies', href: '/shop?gender=men&category=hoodies' },
+      { name: 'Jackets', href: '/shop?gender=men&category=jackets' },
+      { name: 'Pants', href: '/shop?gender=men&category=pants' },
+      { name: 'Shorts', href: '/shop?gender=men&category=shorts' },
+    ],
   },
-  { 
-    name: 'Collections', 
+  {
+    name: 'Women',
+    href: '/shop?gender=women',
+    featured: [
+      { name: 'New Arrivals', href: '/shop?gender=women&sort=newest', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80' },
+      { name: 'Best Sellers', href: '/shop?gender=women&featured=true', image: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&q=80' },
+    ],
+    links: [
+      { name: 'Tops', href: '/shop?gender=women&category=tops' },
+      { name: 'Dresses', href: '/shop?gender=women&category=dresses' },
+      { name: 'Jackets', href: '/shop?gender=women&category=jackets' },
+      { name: 'Pants', href: '/shop?gender=women&category=pants' },
+      { name: 'Skirts', href: '/shop?gender=women&category=skirts' },
+      { name: 'Activewear', href: '/shop?gender=women&category=activewear' },
+    ],
+  },
+  {
+    name: 'Collections',
     href: '/shop',
-    children: [
-      { name: 'Summer Essentials', href: '/shop?collection=summer' },
-      { name: 'Streetwear', href: '/shop?collection=streetwear' },
+    featured: [
+      { name: 'Summer 2026', href: '/shop?collection=summer', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80' },
+      { name: 'Streetwear', href: '/shop?collection=streetwear', image: 'https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=400&q=80' },
+    ],
+    links: [
       { name: 'Minimalist', href: '/shop?collection=minimalist' },
       { name: 'Vintage', href: '/shop?collection=vintage' },
-    ]
+      { name: 'Athletic', href: '/shop?collection=athletic' },
+      { name: 'Casual', href: '/shop?collection=casual' },
+      { name: 'Formal', href: '/shop?collection=formal' },
+      { name: 'Limited Edition', href: '/shop?collection=limited' },
+    ],
   },
-  { name: 'Sale', href: '/shop?sale=true' },
 ]
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [user, setUser] = useState<any>(null)
   const pathname = usePathname()
@@ -70,7 +85,7 @@ export function Header() {
     setMounted(true)
     fetchUser()
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
+      setIsScrolled(window.scrollY > 0)
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
@@ -100,244 +115,356 @@ export function Header() {
   }
 
   return (
-    <header
-      className={cn(
+    <>
+      <header className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        isScrolled 
-          ? 'bg-background/95 backdrop-blur-md border-b' 
-          : 'bg-background'
-      )}
-    >
-      {/* Announcement Bar */}
-      <div className="bg-primary text-primary-foreground text-center py-2.5 text-xs tracking-widest uppercase">
-        <p>Free Shipping on orders over $150 | New Season Collection Available</p>
-      </div>
-
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Left - Mobile menu & Navigation */}
-          <div className="flex items-center gap-8">
-            {/* Mobile menu button */}
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild className="lg:hidden">
-                <Button variant="ghost" size="icon" className="hover:bg-transparent">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-full max-w-sm">
-                <SheetHeader className="border-b pb-4">
-                  <SheetTitle className="text-left font-serif text-2xl tracking-tight">VELURA</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 space-y-1">
-                  {navigation.map((item) => (
-                    <div key={item.name}>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          'block px-3 py-3 text-sm font-medium tracking-wide uppercase transition-colors',
-                          pathname === item.href
-                            ? 'text-foreground'
-                            : 'text-muted-foreground hover:text-foreground'
-                        )}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
-                      {item.children && (
-                        <div className="ml-4 border-l pl-4 space-y-1">
-                          {item.children.map((child) => (
-                            <Link
-                              key={child.name}
-                              href={child.href}
-                              className="block py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                              onClick={() => setMobileMenuOpen(false)}
-                            >
-                              {child.name}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex lg:gap-x-8">
-              {navigation.map((item) => (
-                item.children ? (
-                  <DropdownMenu key={item.name}>
-                    <DropdownMenuTrigger className={cn(
-                      'flex items-center gap-1 text-xs font-medium tracking-widest uppercase transition-colors hover:text-muted-foreground',
-                      pathname.startsWith(item.href) ? 'text-foreground' : 'text-foreground'
-                    )}>
-                      {item.name}
-                      <ChevronDown className="h-3 w-3" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-48">
-                      {item.children.map((child) => (
-                        <DropdownMenuItem key={child.name} asChild>
-                          <Link href={child.href} className="w-full text-sm">
-                            {child.name}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={cn(
-                      'text-xs font-medium tracking-widest uppercase transition-colors hover:text-muted-foreground',
-                      pathname === item.href ? 'text-foreground' : 'text-foreground',
-                      item.name === 'Sale' && 'text-red-600 hover:text-red-700'
-                    )}
-                  >
-                    {item.name}
-                  </Link>
-                )
-              ))}
+        isScrolled ? 'bg-background shadow-sm' : 'bg-background'
+      )}>
+        {/* Top Bar */}
+        <div className="bg-foreground text-background">
+          <div className="max-w-[1400px] mx-auto px-6 h-9 flex items-center justify-between text-xs">
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/stores" className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
+                <MapPin className="h-3.5 w-3.5" />
+                Find a Store
+              </Link>
+              <Link href="/contact" className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
+                <Phone className="h-3.5 w-3.5" />
+                1-800-THREADS
+              </Link>
+            </div>
+            <p className="font-medium tracking-wide">FREE SHIPPING ON ORDERS OVER $100</p>
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/help" className="hover:opacity-70 transition-opacity">Help</Link>
+              <Link href="/orders" className="hover:opacity-70 transition-opacity">Track Order</Link>
             </div>
           </div>
+        </div>
 
-          {/* Center - Logo */}
-          <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-            <span className="text-2xl font-serif font-medium tracking-tight">
-              VELURA
-            </span>
-          </Link>
+        {/* Main Header */}
+        <div className="border-b">
+          <div className="max-w-[1400px] mx-auto px-6">
+            <div className="h-16 flex items-center justify-between gap-8">
+              {/* Logo - Left */}
+              <Link href="/" className="flex-shrink-0">
+                <h1 className="text-2xl font-black tracking-tighter">THREADS</h1>
+              </Link>
 
-          {/* Right side icons */}
-          <div className="flex items-center gap-1">
-            {/* Search */}
-            <Sheet open={searchOpen} onOpenChange={setSearchOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:bg-transparent">
-                  <Search className="h-5 w-5" />
-                  <span className="sr-only">Search</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="top" className="h-auto">
-                <div className="max-w-2xl mx-auto py-8">
-                  <form 
+              {/* Center Navigation - Desktop */}
+              <nav className="hidden lg:flex items-center gap-1">
+                {categories.map((category) => (
+                  <div
+                    key={category.name}
                     className="relative"
-                    onSubmit={(e) => {
-                      e.preventDefault()
-                      const formData = new FormData(e.currentTarget)
-                      const q = formData.get('q')
-                      if (q) {
-                        router.push(`/shop?q=${encodeURIComponent(q.toString())}`)
-                        setSearchOpen(false)
-                      }
-                    }}
+                    onMouseEnter={() => setActiveCategory(category.name)}
+                    onMouseLeave={() => setActiveCategory(null)}
                   >
-                    <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input 
-                      name="q"
-                      placeholder="Search for products..." 
-                      className="pl-8 h-12 text-lg border-0 border-b rounded-none focus-visible:ring-0 focus-visible:border-foreground"
-                      autoFocus
-                    />
-                  </form>
-                  <div className="mt-6 flex gap-4 text-sm text-muted-foreground">
-                    <span>Trending:</span>
-                    <button onClick={() => { router.push('/shop?q=hoodie'); setSearchOpen(false) }} className="hover:text-foreground transition-colors">Hoodies</button>
-                    <button onClick={() => { router.push('/shop?q=jacket'); setSearchOpen(false) }} className="hover:text-foreground transition-colors">Jackets</button>
-                    <button onClick={() => { router.push('/shop?q=tshirt'); setSearchOpen(false) }} className="hover:text-foreground transition-colors">T-Shirts</button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            <Button variant="ghost" size="icon" className="relative hover:bg-transparent" asChild>
-              <Link href="/wishlist">
-                <Heart className="h-5 w-5" />
-                {mounted && wishlistCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-foreground text-[10px] font-medium text-background flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
-                <span className="sr-only">Wishlist</span>
-              </Link>
-            </Button>
-
-            <Button variant="ghost" size="icon" className="relative hover:bg-transparent" asChild>
-              <Link href="/cart">
-                <ShoppingBag className="h-5 w-5" />
-                {mounted && itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-foreground text-[10px] font-medium text-background flex items-center justify-center">
-                    {itemCount}
-                  </span>
-                )}
-                <span className="sr-only">Cart</span>
-              </Link>
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:bg-transparent">
-                  {user?.avatar ? (
-                    <img 
-                      src={user.avatar} 
-                      alt={user.name} 
-                      className="h-5 w-5 rounded-full object-cover"
-                    />
-                  ) : (
-                    <User className="h-5 w-5" />
-                  )}
-                  <span className="sr-only">Account</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {mounted && user ? (
-                  <>
-                    <div className="px-2 py-1.5 text-sm font-medium border-b mb-1">
-                      <p className="truncate">{user.name}</p>
-                      <p className="text-xs text-muted-foreground truncate font-normal">{user.email}</p>
-                    </div>
-                    <DropdownMenuItem asChild>
-                      <Link href="/orders">My Orders</Link>
-                    </DropdownMenuItem>
-                    {user.role === 'admin' && (
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin" className="font-medium">
-                          Admin Dashboard
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild>
-                      <Link href="/wishlist">Wishlist</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="text-destructive focus:text-destructive cursor-pointer"
-                      onClick={handleLogout}
+                    <Link
+                      href={category.href}
+                      className={cn(
+                        'px-4 py-2 text-sm font-medium transition-colors hover:text-muted-foreground',
+                        activeCategory === category.name && 'text-muted-foreground'
+                      )}
                     >
-                      Sign Out
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/login">Sign In</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/register">Create Account</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/orders">Track Order</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                      {category.name}
+                    </Link>
+                  </div>
+                ))}
+                <Link
+                  href="/shop?sale=true"
+                  className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+                >
+                  Sale
+                </Link>
+              </nav>
+
+              {/* Search - Desktop */}
+              <div className="hidden lg:flex flex-1 max-w-md">
+                <form
+                  className="relative w-full"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    const formData = new FormData(e.currentTarget)
+                    const q = formData.get('q')
+                    if (q) {
+                      router.push(`/shop?q=${encodeURIComponent(q.toString())}`)
+                    }
+                  }}
+                >
+                  <Input
+                    name="q"
+                    placeholder="Search products..."
+                    className="w-full h-10 pl-10 pr-4 bg-muted/50 border-0 rounded-full focus-visible:ring-1 focus-visible:ring-foreground"
+                  />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </form>
+              </div>
+
+              {/* Right Actions */}
+              <div className="flex items-center gap-1">
+                {/* Mobile Search Toggle */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden h-10 w-10"
+                  onClick={() => setSearchOpen(!searchOpen)}
+                >
+                  <Search className="h-5 w-5" />
+                </Button>
+
+                {/* Account */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    {mounted && user ? (
+                      <>
+                        <div className="px-3 py-3 border-b">
+                          <p className="font-medium">{user.name}</p>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                        </div>
+                        <DropdownMenuItem asChild>
+                          <Link href="/orders" className="cursor-pointer">My Orders</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/wishlist" className="cursor-pointer">Wishlist</Link>
+                        </DropdownMenuItem>
+                        {user.role === 'admin' && (
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin" className="cursor-pointer font-medium">Admin Dashboard</Link>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
+                          Sign Out
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/login" className="cursor-pointer">Sign In</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/register" className="cursor-pointer">Create Account</Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Wishlist */}
+                <Button variant="ghost" size="icon" className="h-10 w-10 relative" asChild>
+                  <Link href="/wishlist">
+                    <Heart className="h-5 w-5" />
+                    {mounted && wishlistCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-foreground text-background text-xs font-medium flex items-center justify-center">
+                        {wishlistCount}
+                      </span>
+                    )}
+                  </Link>
+                </Button>
+
+                {/* Cart */}
+                <Button variant="ghost" size="icon" className="h-10 w-10 relative" asChild>
+                  <Link href="/cart">
+                    <ShoppingBag className="h-5 w-5" />
+                    {mounted && itemCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-foreground text-background text-xs font-medium flex items-center justify-center">
+                        {itemCount}
+                      </span>
+                    )}
+                  </Link>
+                </Button>
+
+                {/* Mobile Menu Toggle */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden h-10 w-10"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-      </nav>
-    </header>
+
+        {/* Mega Menu - Desktop */}
+        {categories.map((category) => (
+          <div
+            key={category.name}
+            className={cn(
+              'absolute left-0 right-0 bg-background border-b shadow-lg transition-all duration-200 hidden lg:block',
+              activeCategory === category.name ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+            )}
+            onMouseEnter={() => setActiveCategory(category.name)}
+            onMouseLeave={() => setActiveCategory(null)}
+          >
+            <div className="max-w-[1400px] mx-auto px-6 py-8">
+              <div className="grid grid-cols-12 gap-8">
+                {/* Links */}
+                <div className="col-span-4">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                    Shop {category.name}
+                  </h3>
+                  <ul className="space-y-3">
+                    {category.links.map((link) => (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          className="text-sm hover:underline underline-offset-4"
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={category.href}
+                    className="inline-flex items-center gap-1 text-sm font-medium mt-6 hover:underline underline-offset-4"
+                  >
+                    View All
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+
+                {/* Featured Images */}
+                <div className="col-span-8 grid grid-cols-2 gap-6">
+                  {category.featured.map((item) => (
+                    <Link key={item.name} href={item.href} className="group relative">
+                      <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-foreground/20 group-hover:bg-foreground/30 transition-colors" />
+                        <div className="absolute bottom-4 left-4">
+                          <span className="text-background font-medium">{item.name}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Mobile Search */}
+        <div className={cn(
+          'lg:hidden border-b bg-background overflow-hidden transition-all duration-300',
+          searchOpen ? 'max-h-20' : 'max-h-0'
+        )}>
+          <div className="px-6 py-3">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                const q = formData.get('mobile-q')
+                if (q) {
+                  router.push(`/shop?q=${encodeURIComponent(q.toString())}`)
+                  setSearchOpen(false)
+                }
+              }}
+            >
+              <Input
+                name="mobile-q"
+                placeholder="Search products..."
+                className="w-full h-10"
+              />
+            </form>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      <div className={cn(
+        'fixed inset-0 z-40 lg:hidden transition-all duration-300',
+        mobileMenuOpen ? 'visible' : 'invisible'
+      )}>
+        <div
+          className={cn(
+            'absolute inset-0 bg-foreground/50 transition-opacity',
+            mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+          )}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+        <div className={cn(
+          'absolute top-0 left-0 bottom-0 w-full max-w-sm bg-background overflow-y-auto transition-transform duration-300',
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        )}>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-black tracking-tighter">THREADS</h2>
+              <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <nav className="space-y-6">
+              {categories.map((category) => (
+                <div key={category.name}>
+                  <Link
+                    href={category.href}
+                    className="text-lg font-medium block mb-3"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {category.name}
+                  </Link>
+                  <ul className="space-y-2 pl-4 border-l-2 border-muted">
+                    {category.links.map((link) => (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          className="text-sm text-muted-foreground hover:text-foreground"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <Link
+                href="/shop?sale=true"
+                className="text-lg font-medium text-red-600 block"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sale
+              </Link>
+            </nav>
+
+            <div className="mt-8 pt-8 border-t space-y-3">
+              <Link
+                href="/stores"
+                className="flex items-center gap-3 text-sm"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <MapPin className="h-4 w-4" />
+                Find a Store
+              </Link>
+              <Link
+                href="/help"
+                className="flex items-center gap-3 text-sm"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Phone className="h-4 w-4" />
+                Contact Us
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Spacer for fixed header */}
+      <div className="h-[100px]" />
+    </>
   )
 }

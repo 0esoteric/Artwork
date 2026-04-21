@@ -1,27 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, ShoppingBag, Eye, Package } from 'lucide-react'
+import { Heart, ShoppingBag, ChevronLeft, ChevronRight, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { useCartStore } from '@/lib/cart-store'
 import { useWishlistStore } from '@/lib/wishlist-store'
 import { useToast } from '@/hooks/use-toast'
 import useSWR from 'swr'
 
-const PLACEHOLDER_IMAGE = "/placeholder.svg"
-
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-// Static fallback products for when database is not connected
 const staticProducts = [
   {
     id: 1,
-    name: 'Essential Cotton T-Shirt',
-    slug: 'essential-cotton-tshirt',
+    name: 'Essential Cotton Tee',
+    slug: 'essential-cotton-tee',
     price: 45,
     compare_price: null,
     image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80',
@@ -31,8 +27,8 @@ const staticProducts = [
   },
   {
     id: 2,
-    name: 'Classic Hoodie',
-    slug: 'classic-hoodie',
+    name: 'Classic Pullover Hoodie',
+    slug: 'classic-pullover-hoodie',
     price: 89,
     compare_price: 120,
     image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80',
@@ -53,8 +49,8 @@ const staticProducts = [
   },
   {
     id: 4,
-    name: 'Denim Jacket',
-    slug: 'denim-jacket',
+    name: 'Vintage Denim Jacket',
+    slug: 'vintage-denim-jacket',
     price: 145,
     compare_price: 180,
     image: 'https://images.unsplash.com/photo-1576871337622-98d48d1cf531?w=600&q=80',
@@ -64,8 +60,8 @@ const staticProducts = [
   },
   {
     id: 5,
-    name: 'Premium Oxford Shirt',
-    slug: 'premium-oxford-shirt',
+    name: 'Oxford Button Down',
+    slug: 'oxford-button-down',
     price: 85,
     compare_price: null,
     image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&q=80',
@@ -75,36 +71,14 @@ const staticProducts = [
   },
   {
     id: 6,
-    name: 'Streetwear Cargo Pants',
-    slug: 'streetwear-cargo-pants',
+    name: 'Cargo Street Pants',
+    slug: 'cargo-street-pants',
     price: 95,
     compare_price: null,
     image: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80',
     category_name: 'Pants',
     is_featured: true,
     stock_quantity: 18,
-  },
-  {
-    id: 7,
-    name: 'Oversized Sweatshirt',
-    slug: 'oversized-sweatshirt',
-    price: 79,
-    compare_price: 99,
-    image: 'https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=600&q=80',
-    category_name: 'Hoodies',
-    is_featured: true,
-    stock_quantity: 55,
-  },
-  {
-    id: 8,
-    name: 'Minimalist Tote Bag',
-    slug: 'minimalist-tote-bag',
-    price: 55,
-    compare_price: null,
-    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80',
-    category_name: 'Accessories',
-    is_featured: true,
-    stock_quantity: 30,
   },
 ]
 
@@ -116,7 +90,7 @@ function formatPrice(price: number) {
   }).format(price)
 }
 
-function ProductCard({ product }: { product: any }) {
+function ProductCard({ product, index }: { product: any; index: number }) {
   const { addItem } = useCartStore()
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
@@ -130,18 +104,13 @@ function ProductCard({ product }: { product: any }) {
 
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     if (isWishlisted) {
       removeFromWishlist(product.id)
-      toast({
-        title: "Removed from Wishlist",
-        description: `${product.name} has been removed.`,
-      })
+      toast({ title: "Removed from Wishlist" })
     } else {
       addToWishlist(product)
-      toast({
-        title: "Added to Wishlist",
-        description: `${product.name} has been saved.`,
-      })
+      toast({ title: "Added to Wishlist" })
     }
   }
 
@@ -150,94 +119,66 @@ function ProductCard({ product }: { product: any }) {
     : null
 
   return (
-    <div className="group">
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-        {product.image ? (
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement
-              target.src = PLACEHOLDER_IMAGE
-            }}
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full w-full">
-            <Package className="h-12 w-12 text-muted-foreground" />
-          </div>
-        )}
-        
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {product.is_featured && (
-            <Badge className="bg-foreground text-background text-xs rounded-none px-2">
-              New
-            </Badge>
+    <div className="group flex-shrink-0 w-[300px] md:w-[350px]">
+      <Link href={`/product/${product.slug}`}>
+        <div className="relative aspect-[4/5] overflow-hidden bg-muted mb-4">
+          {product.image ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-cover transition-all duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <Package className="h-12 w-12 text-muted-foreground" />
+            </div>
           )}
+          
+          {/* Sale Badge */}
           {discount && (
-            <Badge className="bg-red-600 text-white text-xs rounded-none px-2">
-              -{discount}%
-            </Badge>
+            <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1">
+              SALE
+            </div>
           )}
-        </div>
 
-        {/* Quick Actions */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button 
-            size="icon" 
-            variant="secondary" 
-            className="h-9 w-9 rounded-none bg-background/90 hover:bg-background"
+          {/* Wishlist Button */}
+          <button
             onClick={toggleWishlist}
+            className="absolute top-4 right-4 w-10 h-10 bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
           >
-            <Heart className={cn("h-4 w-4", isWishlisted && "fill-foreground")} />
-            <span className="sr-only">
-              {mounted ? (isWishlisted ? 'Remove from wishlist' : 'Add to wishlist') : 'Add to wishlist'}
-            </span>
-          </Button>
-          <Button size="icon" variant="secondary" className="h-9 w-9 rounded-none bg-background/90 hover:bg-background" asChild>
-            <Link href={`/product/${product.slug}`}>
-              <Eye className="h-4 w-4" />
-              <span className="sr-only">Quick view</span>
-            </Link>
-          </Button>
-        </div>
+            <Heart className={cn("h-5 w-5", isWishlisted && "fill-foreground")} />
+          </button>
 
-        {/* Add to Cart */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform">
-          <Button 
-            className="w-full gap-2 rounded-none"
-            onClick={(e) => {
-              e.preventDefault()
-              addItem(product)
-              toast({
-                title: "Added to Bag",
-                description: `${product.name} has been added to your bag.`,
-              })
-            }}
-            disabled={product.stock_quantity === 0}
-          >
-            <ShoppingBag className="h-4 w-4" />
-            {product.stock_quantity === 0 ? 'Sold Out' : 'Add to Bag'}
-          </Button>
+          {/* Quick Add */}
+          <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+            <Button 
+              className="w-full h-12 gap-2"
+              onClick={(e) => {
+                e.preventDefault()
+                addItem(product)
+                toast({ title: "Added to Bag", description: product.name })
+              }}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              Quick Add
+            </Button>
+          </div>
         </div>
-      </div>
+      </Link>
 
-      {/* Product Info */}
-      <div className="mt-4 space-y-1">
-        <Link href={`/product/${product.slug}`}>
-          <h3 className="text-sm font-medium text-foreground hover:underline underline-offset-4 transition-colors line-clamp-1">
-            {product.name}
-          </h3>
-        </Link>
-        <p className="text-xs text-muted-foreground">
-          {product.category_name || 'Clothing'}
-        </p>
-        <div className="flex items-center gap-2 pt-1">
-          <span className="text-sm font-medium">
-            {formatPrice(product.price)}
-          </span>
+      {/* Info - Different layout: inline pricing */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <Link href={`/product/${product.slug}`}>
+            <h3 className="font-medium truncate hover:underline underline-offset-4">
+              {product.name}
+            </h3>
+          </Link>
+          <p className="text-sm text-muted-foreground mt-0.5">{product.category_name}</p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="font-semibold">{formatPrice(product.price)}</span>
           {product.compare_price && (
             <span className="text-sm text-muted-foreground line-through">
               {formatPrice(product.compare_price)}
@@ -250,37 +191,94 @@ function ProductCard({ product }: { product: any }) {
 }
 
 export function FeaturedProducts() {
-  const { data, error } = useSWR('/api/products?featured=true', fetcher)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+  const { data } = useSWR('/api/products?featured=true', fetcher)
   
-  // Use API data if available, otherwise fall back to static products
   const products = (data?.products && data.products.length > 0) ? data.products : staticProducts
 
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+      setCanScrollLeft(scrollLeft > 0)
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10)
+    }
+  }
+
+  useEffect(() => {
+    checkScroll()
+    const ref = scrollRef.current
+    if (ref) {
+      ref.addEventListener('scroll', checkScroll)
+      return () => ref.removeEventListener('scroll', checkScroll)
+    }
+  }, [products])
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 370
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
+
   return (
-    <section className="py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
+    <section className="py-20 bg-muted/30">
+      <div className="max-w-[1400px] mx-auto">
+        {/* Header with Navigation */}
+        <div className="flex items-end justify-between px-6 lg:px-16 mb-8">
           <div>
-            <p className="text-muted-foreground text-sm tracking-[0.2em] uppercase mb-2">
-              Curated Selection
-            </p>
-            <h2 className="text-4xl md:text-5xl font-serif">
-              Featured Products
-            </h2>
+            <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-2 block">
+              Just Dropped
+            </span>
+            <h2 className="text-4xl lg:text-5xl font-black tracking-tight">New Arrivals</h2>
           </div>
-          <Link 
-            href="/shop"
-            className="mt-4 sm:mt-0 text-sm font-medium tracking-wide uppercase hover:underline underline-offset-4"
-          >
-            Shop All
-          </Link>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-full"
+              onClick={() => scroll('left')}
+              disabled={!canScrollLeft}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-full"
+              onClick={() => scroll('right')}
+              disabled={!canScrollRight}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-6 md:gap-y-12">
-          {products.slice(0, 8).map((product: any) => (
-            <ProductCard key={product.id} product={product} />
+        {/* Horizontal Scroll Products - Full bleed */}
+        <div 
+          ref={scrollRef}
+          className="flex gap-6 overflow-x-auto pb-4 px-6 lg:px-16 scrollbar-hide snap-x snap-mandatory"
+        >
+          {products.slice(0, 8).map((product: any, index: number) => (
+            <ProductCard key={product.id} product={product} index={index} />
           ))}
+          
+          {/* View All Card */}
+          <Link 
+            href="/shop"
+            className="flex-shrink-0 w-[300px] md:w-[350px] aspect-[4/5] bg-foreground text-background flex flex-col items-center justify-center group snap-start"
+          >
+            <span className="text-6xl font-black mb-4">+</span>
+            <span className="text-lg font-medium">View All Products</span>
+            <span className="text-sm opacity-60 mt-1 group-hover:opacity-100 transition-opacity">
+              {products.length}+ items
+            </span>
+          </Link>
         </div>
       </div>
     </section>

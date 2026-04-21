@@ -1,44 +1,51 @@
-import { Truck, RefreshCw, Shield, Headphones } from 'lucide-react'
+import { Truck, RotateCcw, ShieldCheck, Clock } from 'lucide-react'
 
 const features = [
   {
     icon: Truck,
     title: 'Free Shipping',
-    description: 'Complimentary shipping on all orders over $150',
+    value: '$100+',
+    description: 'On all orders',
   },
   {
-    icon: RefreshCw,
+    icon: RotateCcw,
     title: 'Easy Returns',
-    description: '30-day hassle-free return policy',
+    value: '30 Days',
+    description: 'Hassle-free',
   },
   {
-    icon: Shield,
-    title: 'Secure Checkout',
-    description: '100% secure payment processing',
+    icon: ShieldCheck,
+    title: 'Secure',
+    value: '100%',
+    description: 'Payment protected',
   },
   {
-    icon: Headphones,
-    title: '24/7 Support',
-    description: 'Dedicated customer service team',
+    icon: Clock,
+    title: 'Support',
+    value: '24/7',
+    description: 'Always here',
   },
 ]
 
 export function FeaturesSection() {
   return (
-    <section className="py-16 border-y">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <section className="bg-muted/50">
+      <div className="max-w-[1400px] mx-auto">
+        {/* Horizontal strip with dividers */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-border">
           {features.map((feature) => (
-            <div key={feature.title} className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 mb-4">
-                <feature.icon className="h-6 w-6" />
+            <div key={feature.title} className="px-6 lg:px-8 py-8 lg:py-10 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-foreground text-background flex items-center justify-center flex-shrink-0">
+                <feature.icon className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-medium tracking-wide uppercase mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {feature.description}
-              </p>
+              <div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-black">{feature.value}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {feature.title} {feature.description}
+                </p>
+              </div>
             </div>
           ))}
         </div>

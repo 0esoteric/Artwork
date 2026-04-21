@@ -3,17 +3,16 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Truck, Shield, Gift } from 'lucide-react'
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, X, Truck, RotateCcw, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
 import { useCartStore } from '@/lib/cart-store'
 import { toast } from 'sonner'
 
 function formatPrice(price: number) {
-  return new Intl.NumberFormat('en-IN', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'INR',
+    currency: 'USD',
     maximumFractionDigits: 0,
   }).format(price)
 }
@@ -22,26 +21,26 @@ function formatPrice(price: number) {
 const demoItems = [
   {
     id: 1,
-    name: 'Tree of Life in Madhubani',
-    slug: 'tree-of-life-madhubani',
-    price: 15000,
-    comparePrice: 18000,
-    artist: 'Ambika Devi',
-    artForm: 'Madhubani',
-    dimensions: '24 in X 36 in',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&q=80',
+    name: 'Essential Cotton Tee',
+    slug: 'essential-cotton-tee',
+    price: 45,
+    comparePrice: null,
+    artist: 'THREADS',
+    artForm: 'T-Shirts',
+    dimensions: 'Size M',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80',
     isReadyToShip: true,
   },
   {
     id: 2,
-    name: 'Dancing Peacocks in Gond',
-    slug: 'dancing-peacocks-gond',
-    price: 12000,
-    comparePrice: null,
-    artist: 'Sandeep Dhurve',
-    artForm: 'Gond',
-    dimensions: '20 in X 30 in',
-    image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&q=80',
+    name: 'Classic Pullover Hoodie',
+    slug: 'classic-pullover-hoodie',
+    price: 89,
+    comparePrice: 120,
+    artist: 'THREADS',
+    artForm: 'Hoodies',
+    dimensions: 'Size L',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80',
     isReadyToShip: true,
   },
 ]
@@ -56,26 +55,34 @@ export function CartContent() {
     setMounted(true)
   }, [])
 
-  // Add demo items for showcase
   const addDemoItems = () => {
     demoItems.forEach((item) => {
       addItem(item)
     })
-    toast.success('Demo items added to cart')
+    toast.success('Demo items added to bag')
   }
 
   if (!mounted) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse">
-          <div className="h-10 w-48 bg-muted rounded mb-8" />
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="h-40 bg-muted rounded-lg" />
-              ))}
+      <div className="min-h-screen">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-16 py-12">
+          <div className="animate-pulse">
+            <div className="h-10 w-48 bg-muted mb-12" />
+            <div className="grid lg:grid-cols-5 gap-12">
+              <div className="lg:col-span-3 space-y-6">
+                {[1, 2].map((i) => (
+                  <div key={i} className="flex gap-6">
+                    <div className="w-32 h-40 bg-muted" />
+                    <div className="flex-1 space-y-3">
+                      <div className="h-5 w-48 bg-muted" />
+                      <div className="h-4 w-24 bg-muted" />
+                      <div className="h-6 w-20 bg-muted" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="lg:col-span-2 h-80 bg-muted" />
             </div>
-            <div className="h-80 bg-muted rounded-lg" />
           </div>
         </div>
       </div>
@@ -83,14 +90,14 @@ export function CartContent() {
   }
 
   const subtotal = getSubtotal()
-  const shipping = subtotal >= 5000 ? 0 : 499
-  const discount = couponApplied ? Math.round(subtotal * 0.1) : 0
+  const shipping = subtotal >= 100 ? 0 : 9.99
+  const discount = couponApplied ? Math.round(subtotal * 0.15) : 0
   const total = subtotal + shipping - discount
 
   const handleApplyCoupon = () => {
-    if (couponCode.toLowerCase() === 'artisan10') {
+    if (couponCode.toLowerCase() === 'threads15') {
       setCouponApplied(true)
-      toast.success('Coupon applied! 10% discount added')
+      toast.success('Coupon applied! 15% discount added')
     } else {
       toast.error('Invalid coupon code')
     }
@@ -98,22 +105,23 @@ export function CartContent() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center">
-          <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
-          <h1 className="text-3xl font-serif font-bold mb-4">Your Cart is Empty</h1>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Looks like you haven&apos;t added any artworks to your cart yet. 
-            Explore our collection of handmade masterpieces.
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-8">
+            <ShoppingBag className="h-10 w-10 text-muted-foreground" />
+          </div>
+          <h1 className="text-3xl font-black tracking-tight mb-4">Your Bag is Empty</h1>
+          <p className="text-muted-foreground mb-8">
+            Looks like you haven&apos;t added anything yet. Let&apos;s change that.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg">
+          <div className="flex flex-col gap-3">
+            <Button asChild size="lg" className="h-14">
               <Link href="/shop">
-                Start Shopping
+                Continue Shopping
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" onClick={addDemoItems}>
+            <Button variant="outline" size="lg" className="h-14" onClick={addDemoItems}>
               Add Demo Items
             </Button>
           </div>
@@ -123,29 +131,30 @@ export function CartContent() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-serif font-bold mb-8">Shopping Cart</h1>
+    <div className="min-h-screen pb-20">
+      {/* Header */}
+      <div className="bg-muted/30 py-12">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-16">
+          <h1 className="text-4xl lg:text-5xl font-black tracking-tight">
+            Your Bag
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            {items.length} {items.length === 1 ? 'item' : 'items'}
+          </p>
+        </div>
+      </div>
 
-      <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-        {/* Cart Items */}
-        <div className="lg:col-span-2">
-          <div className="bg-card rounded-lg border">
-            {/* Header */}
-            <div className="hidden md:grid md:grid-cols-12 gap-4 p-4 bg-muted/50 rounded-t-lg text-sm font-medium text-muted-foreground">
-              <div className="col-span-6">Product</div>
-              <div className="col-span-2 text-center">Price</div>
-              <div className="col-span-2 text-center">Quantity</div>
-              <div className="col-span-2 text-right">Total</div>
-            </div>
-
-            {/* Items */}
-            <div className="divide-y">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-16 py-12">
+        <div className="grid lg:grid-cols-5 gap-12">
+          {/* Cart Items - Takes 3 columns */}
+          <div className="lg:col-span-3">
+            <div className="space-y-0 divide-y">
               {items.map((item) => (
-                <div key={item.id} className="p-4">
-                  <div className="md:grid md:grid-cols-12 md:gap-4 md:items-center">
-                    {/* Product Info */}
-                    <div className="col-span-6 flex gap-4">
-                      <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                <div key={item.id} className="py-6 first:pt-0">
+                  <div className="flex gap-6">
+                    {/* Image */}
+                    <Link href={`/product/${item.slug}`} className="flex-shrink-0">
+                      <div className="relative w-28 h-36 md:w-32 md:h-40 bg-muted overflow-hidden">
                         <Image
                           src={item.image}
                           alt={item.name}
@@ -153,168 +162,178 @@ export function CartContent() {
                           className="object-cover"
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <Link 
-                          href={`/product/${item.slug}`}
-                          className="font-medium hover:text-primary transition-colors line-clamp-2"
+                    </Link>
+
+                    {/* Details */}
+                    <div className="flex-1 flex flex-col min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <Link 
+                            href={`/product/${item.slug}`}
+                            className="font-medium hover:underline underline-offset-4 line-clamp-1"
+                          >
+                            {item.name}
+                          </Link>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {item.artForm} {item.dimensions && `/ ${item.dimensions}`}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            removeItem(item.id)
+                            toast.success('Item removed')
+                          }}
+                          className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors"
                         >
-                          {item.name}
-                        </Link>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          by {item.artist}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {item.dimensions}
-                        </p>
-                        {item.isReadyToShip && (
-                          <span className="inline-block text-xs text-accent mt-1">
-                            Ready to Ship
+                          <X className="h-5 w-5" />
+                        </button>
+                      </div>
+
+                      <div className="mt-auto pt-4 flex items-end justify-between">
+                        {/* Quantity Controls */}
+                        <div className="flex items-center border">
+                          <button
+                            className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors"
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <span className="w-10 text-center text-sm font-medium">
+                            {item.quantity}
                           </span>
-                        )}
+                          <button
+                            className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors"
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        {/* Price */}
+                        <div className="text-right">
+                          <span className="font-semibold">
+                            {formatPrice(item.price * item.quantity)}
+                          </span>
+                          {item.quantity > 1 && (
+                            <p className="text-xs text-muted-foreground">
+                              {formatPrice(item.price)} each
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Price */}
-                    <div className="col-span-2 text-center mt-4 md:mt-0">
-                      <span className="md:hidden text-sm text-muted-foreground mr-2">Price:</span>
-                      <span>{formatPrice(item.price)}</span>
-                    </div>
-
-                    {/* Quantity */}
-                    <div className="col-span-2 flex items-center justify-center mt-4 md:mt-0">
-                      <div className="flex items-center border rounded-md">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="w-8 text-center text-sm">{item.quantity}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        >
-                          <Plus className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Total */}
-                    <div className="col-span-2 flex items-center justify-between md:justify-end mt-4 md:mt-0">
-                      <span className="font-semibold">
-                        {formatPrice(item.price * item.quantity)}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive ml-2"
-                        onClick={() => {
-                          removeItem(item.id)
-                          toast.success('Item removed from cart')
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* Actions */}
-          <div className="flex flex-wrap gap-4 mt-6">
-            <Button variant="outline" asChild>
-              <Link href="/shop">Continue Shopping</Link>
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="text-destructive hover:text-destructive"
-              onClick={() => {
-                clearCart()
-                toast.success('Cart cleared')
-              }}
-            >
-              Clear Cart
-            </Button>
-          </div>
-        </div>
-
-        {/* Order Summary */}
-        <div className="mt-8 lg:mt-0">
-          <div className="bg-card rounded-lg border p-6 sticky top-28">
-            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-
-            {/* Coupon */}
-            <div className="flex gap-2 mb-6">
-              <Input
-                placeholder="Coupon code"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-                disabled={couponApplied}
-              />
+            {/* Actions */}
+            <div className="flex items-center justify-between pt-6 border-t mt-6">
+              <Button variant="ghost" asChild>
+                <Link href="/shop">
+                  Continue Shopping
+                </Link>
+              </Button>
               <Button 
-                variant="outline" 
-                onClick={handleApplyCoupon}
-                disabled={couponApplied || !couponCode}
+                variant="ghost" 
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => {
+                  clearCart()
+                  toast.success('Bag cleared')
+                }}
               >
-                Apply
+                Clear Bag
               </Button>
             </div>
+          </div>
 
-            <Separator className="mb-4" />
+          {/* Order Summary - Takes 2 columns */}
+          <div className="lg:col-span-2">
+            <div className="bg-muted/30 p-6 lg:p-8 sticky top-[120px]">
+              <h2 className="text-lg font-bold mb-6">Order Summary</h2>
 
-            {/* Summary */}
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
-                <span className={shipping === 0 ? 'text-accent' : ''}>
-                  {shipping === 0 ? 'Free' : formatPrice(shipping)}
-                </span>
-              </div>
-              {couponApplied && (
-                <div className="flex justify-between text-accent">
-                  <span>Discount (10%)</span>
-                  <span>-{formatPrice(discount)}</span>
+              {/* Coupon */}
+              <div className="mb-6">
+                <p className="text-sm font-medium mb-2">Promo Code</p>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    disabled={couponApplied}
+                    className="h-12"
+                  />
+                  <Button 
+                    variant="outline"
+                    className="h-12 px-6"
+                    onClick={handleApplyCoupon}
+                    disabled={couponApplied || !couponCode}
+                  >
+                    Apply
+                  </Button>
                 </div>
-              )}
-            </div>
-
-            <Separator className="my-4" />
-
-            <div className="flex justify-between font-semibold text-lg mb-6">
-              <span>Total</span>
-              <span>{formatPrice(total)}</span>
-            </div>
-
-            <Button asChild className="w-full" size="lg">
-              <Link href="/checkout">
-                Proceed to Checkout
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-
-            {/* Trust Badges */}
-            <div className="mt-6 space-y-3 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-primary" />
-                <span>Free shipping on orders above Rs. 5,000</span>
+                {!couponApplied && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Try: THREADS15 for 15% off
+                  </p>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary" />
-                <span>Secure checkout with Razorpay</span>
+
+              {/* Totals */}
+              <div className="space-y-3 text-sm border-t pt-6">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="font-medium">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span className={shipping === 0 ? 'text-green-600 font-medium' : 'font-medium'}>
+                    {shipping === 0 ? 'FREE' : formatPrice(shipping)}
+                  </span>
+                </div>
+                {couponApplied && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount (15%)</span>
+                    <span className="font-medium">-{formatPrice(discount)}</span>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <Gift className="h-4 w-4 text-primary" />
-                <span>Use code ARTISAN10 for 10% off</span>
+
+              <div className="flex justify-between py-6 border-t mt-6">
+                <span className="text-lg font-bold">Total</span>
+                <span className="text-lg font-bold">{formatPrice(total)}</span>
+              </div>
+
+              <Button asChild size="lg" className="w-full h-14 text-sm font-medium tracking-wide">
+                <Link href="/checkout">
+                  Checkout
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+
+              {/* Trust Badges - Vertical Stack */}
+              <div className="mt-8 pt-6 border-t space-y-4">
+                <div className="flex items-center gap-3 text-sm">
+                  <Truck className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">Free Shipping over $100</p>
+                    <p className="text-xs text-muted-foreground">3-5 business days</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <RotateCcw className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">30-Day Returns</p>
+                    <p className="text-xs text-muted-foreground">Free returns & exchanges</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <Lock className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">Secure Checkout</p>
+                    <p className="text-xs text-muted-foreground">SSL encrypted payment</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

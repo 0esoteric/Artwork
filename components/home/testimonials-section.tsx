@@ -1,148 +1,133 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Star } from 'lucide-react'
 
-const testimonials = [
+const reviews = [
   {
     id: 1,
-    name: 'Sarah Mitchell',
-    location: 'New York',
+    name: 'Alex K.',
+    location: 'NYC',
     rating: 5,
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
-    text: 'The quality of the clothing is exceptional. I ordered a hoodie and it exceeded all my expectations. The fit is perfect and the fabric feels premium.',
-    product: 'Essential Hoodie',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+    text: 'Best quality basics I\'ve ever owned. The cotton is incredibly soft and holds up wash after wash.',
+    product: 'Essential Tee',
+    verified: true,
   },
   {
     id: 2,
-    name: 'James Chen',
-    location: 'Los Angeles',
+    name: 'Jordan M.',
+    location: 'LA',
     rating: 5,
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-    text: 'Finally found a brand that understands modern minimalism. The pieces are versatile, well-made, and look even better in person than online.',
-    product: 'Minimalist Collection',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+    text: 'Finally a brand that gets minimalist style right. Clean designs, perfect fit, premium feel.',
+    product: 'Minimal Hoodie',
+    verified: true,
   },
   {
     id: 3,
-    name: 'Emma Rodriguez',
+    name: 'Sam T.',
     location: 'Chicago',
     rating: 5,
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
-    text: 'Fast shipping, beautiful packaging, and the clothes fit true to size. VELURA has become my go-to for wardrobe essentials.',
-    product: 'Basics Bundle',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80',
+    text: 'The streetwear collection is insane. Copped the cargo pants and they\'re now my everyday go-to.',
+    product: 'Cargo Pants',
+    verified: true,
   },
   {
     id: 4,
-    name: 'Michael Park',
-    location: 'Seattle',
+    name: 'Riley P.',
+    location: 'Austin',
     rating: 5,
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80',
-    text: 'The streetwear collection is fire. Unique designs that stand out without being over the top. Already planning my next order.',
-    product: 'Streetwear Jacket',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
+    text: 'Lightning fast shipping and the packaging is chef\'s kiss. Will definitely be ordering again.',
+    product: 'Denim Jacket',
+    verified: true,
   },
 ]
 
 export function TestimonialsSection() {
-  const [currentIndex, setCurrentIndex] = useState(0)
-
-  const nextTestimonial = () => {
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length)
-  }
-
-  const prevTestimonial = () => {
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
-  }
-
   return (
-    <section className="py-24 bg-secondary/30 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <p className="text-muted-foreground text-sm tracking-[0.2em] uppercase mb-2">
-            Reviews
-          </p>
-          <h2 className="text-4xl md:text-5xl font-serif">
-            What Our Customers Say
-          </h2>
-        </div>
-
-        {/* Testimonials Carousel */}
-        <div className="relative max-w-3xl mx-auto">
-          <div className="relative overflow-hidden">
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {testimonials.map((testimonial) => (
-                <div
-                  key={testimonial.id}
-                  className="w-full flex-shrink-0 px-4"
-                >
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-1 mb-6">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-foreground text-foreground" />
-                      ))}
-                    </div>
-                    
-                    <p className="text-xl md:text-2xl leading-relaxed mb-8 font-serif">
-                      &ldquo;{testimonial.text}&rdquo;
-                    </p>
-
-                    <div className="flex items-center justify-center gap-4">
-                      <div className="relative h-12 w-12 rounded-full overflow-hidden">
-                        <Image
-                          src={testimonial.image}
-                          alt={testimonial.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="text-left">
-                        <p className="font-medium text-sm">{testimonial.name}</p>
-                        <p className="text-xs text-muted-foreground">{testimonial.location}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+    <section className="py-20 bg-muted/30 overflow-hidden">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-16">
+        {/* Header with stats */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+          <div>
+            <span className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-2 block">
+              Customer Love
+            </span>
+            <h2 className="text-4xl lg:text-5xl font-black tracking-tight">Reviews</h2>
+          </div>
+          
+          {/* Stats row */}
+          <div className="flex items-center gap-8 lg:gap-12">
+            <div className="text-center">
+              <p className="text-3xl lg:text-4xl font-black">4.9</p>
+              <div className="flex items-center gap-0.5 justify-center mt-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-3 w-3 fill-foreground text-foreground" />
+                ))}
+              </div>
+            </div>
+            <div className="h-12 w-px bg-border" />
+            <div className="text-center">
+              <p className="text-3xl lg:text-4xl font-black">2.5k+</p>
+              <p className="text-xs text-muted-foreground mt-1">Reviews</p>
+            </div>
+            <div className="h-12 w-px bg-border" />
+            <div className="text-center">
+              <p className="text-3xl lg:text-4xl font-black">98%</p>
+              <p className="text-xs text-muted-foreground mt-1">Recommend</p>
             </div>
           </div>
+        </div>
 
-          {/* Navigation */}
-          <button
-            onClick={prevTestimonial}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 p-2 hover:bg-muted rounded-full transition-colors"
-            aria-label="Previous testimonial"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={nextTestimonial}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 p-2 hover:bg-muted rounded-full transition-colors"
-            aria-label="Next testimonial"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
+        {/* Reviews Masonry Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {reviews.map((review, index) => (
+            <div 
+              key={review.id} 
+              className={`bg-background p-6 border ${index === 0 ? 'lg:row-span-2' : ''}`}
+            >
+              {/* Rating */}
+              <div className="flex items-center gap-0.5 mb-4">
+                {[...Array(review.rating)].map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-foreground text-foreground" />
+                ))}
+              </div>
 
-          {/* Dots */}
-          <div className="flex justify-center gap-2 mt-10">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={cn(
-                  'h-1.5 rounded-full transition-all',
-                  index === currentIndex
-                    ? 'bg-foreground w-8'
-                    : 'bg-foreground/20 w-4 hover:bg-foreground/40'
-                )}
-                aria-label={`Go to testimonial ${index + 1}`}
-              />
-            ))}
-          </div>
+              {/* Review Text */}
+              <p className={`text-foreground leading-relaxed mb-6 ${index === 0 ? 'text-lg' : 'text-sm'}`}>
+                &ldquo;{review.text}&rdquo;
+              </p>
+
+              {/* Product Tag */}
+              <div className="inline-block bg-muted px-3 py-1 mb-6">
+                <span className="text-xs font-medium">{review.product}</span>
+              </div>
+
+              {/* Author */}
+              <div className="flex items-center gap-3 pt-4 border-t">
+                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted">
+                  <Image
+                    src={review.avatar}
+                    alt={review.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-sm">{review.name}</p>
+                    {review.verified && (
+                      <span className="text-xs text-green-600 font-medium">Verified</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{review.location}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

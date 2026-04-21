@@ -16,6 +16,8 @@ import {
   LogOut,
   ChevronDown,
   Palette,
+  UserCircle,
+  FolderOpen,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -27,6 +29,8 @@ import {
 const sidebarLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/artists", label: "Artists", icon: UserCircle },
+  { href: "/admin/categories", label: "Categories", icon: FolderOpen },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },

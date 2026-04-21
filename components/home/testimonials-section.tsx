@@ -2,45 +2,45 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Quote, ChevronLeft, ChevronRight, Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const testimonials = [
   {
     id: 1,
-    name: 'Priya Sharma',
-    location: 'Mumbai',
+    name: 'Sarah Mitchell',
+    location: 'New York',
     rating: 5,
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
-    text: 'The Madhubani painting I purchased is absolutely stunning. The colors are vibrant and the details are incredible. You can truly feel the artist\'s dedication in every stroke.',
-    product: 'Tree of Life Madhubani',
+    text: 'The quality of the clothing is exceptional. I ordered a hoodie and it exceeded all my expectations. The fit is perfect and the fabric feels premium.',
+    product: 'Essential Hoodie',
   },
   {
     id: 2,
-    name: 'Rahul Verma',
-    location: 'Delhi',
+    name: 'James Chen',
+    location: 'Los Angeles',
     rating: 5,
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-    text: 'I\'ve been collecting traditional Indian art for years, and Artisan Haven has the most authentic collection I\'ve seen. The quality and craftsmanship are unmatched.',
-    product: 'Gond Wildlife Collection',
+    text: 'Finally found a brand that understands modern minimalism. The pieces are versatile, well-made, and look even better in person than online.',
+    product: 'Minimalist Collection',
   },
   {
     id: 3,
-    name: 'Ananya Iyer',
-    location: 'Bangalore',
+    name: 'Emma Rodriguez',
+    location: 'Chicago',
     rating: 5,
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
-    text: 'What I love most is knowing that my purchase directly supports the artisan community. The packaging was beautiful and the artwork arrived in perfect condition.',
-    product: 'Warli Art Series',
+    text: 'Fast shipping, beautiful packaging, and the clothes fit true to size. VELURA has become my go-to for wardrobe essentials.',
+    product: 'Basics Bundle',
   },
   {
     id: 4,
-    name: 'Vikram Singh',
-    location: 'Jaipur',
+    name: 'Michael Park',
+    location: 'Seattle',
     rating: 5,
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80',
-    text: 'The Pichwai painting has transformed my living room. It\'s a conversation starter and brings such positive energy to the space. Highly recommended!',
-    product: 'Krishna Leela Pichwai',
+    text: 'The streetwear collection is fire. Unique designs that stand out without being over the top. Already planning my next order.',
+    product: 'Streetwear Jacket',
   },
 ]
 
@@ -56,20 +56,20 @@ export function TestimonialsSection() {
   }
 
   return (
-    <section className="py-20 bg-foreground text-background overflow-hidden">
+    <section className="py-24 bg-secondary/30 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <p className="text-primary font-medium tracking-wider uppercase mb-2">
-            Customer Love
+        <div className="text-center mb-16">
+          <p className="text-muted-foreground text-sm tracking-[0.2em] uppercase mb-2">
+            Reviews
           </p>
-          <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-serif">
             What Our Customers Say
           </h2>
         </div>
 
         {/* Testimonials Carousel */}
-        <div className="relative max-w-4xl mx-auto">
+        <div className="relative max-w-3xl mx-auto">
           <div className="relative overflow-hidden">
             <div
               className="flex transition-transform duration-500 ease-out"
@@ -81,20 +81,18 @@ export function TestimonialsSection() {
                   className="w-full flex-shrink-0 px-4"
                 >
                   <div className="text-center">
-                    <Quote className="h-12 w-12 text-primary mx-auto mb-6 opacity-50" />
+                    <div className="flex items-center justify-center gap-1 mb-6">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-foreground text-foreground" />
+                      ))}
+                    </div>
                     
-                    <p className="text-xl md:text-2xl leading-relaxed mb-8 font-serif italic">
+                    <p className="text-xl md:text-2xl leading-relaxed mb-8 font-serif">
                       &ldquo;{testimonial.text}&rdquo;
                     </p>
 
-                    <div className="flex items-center justify-center gap-1 mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                      ))}
-                    </div>
-
                     <div className="flex items-center justify-center gap-4">
-                      <div className="relative h-14 w-14 rounded-full overflow-hidden ring-2 ring-primary">
+                      <div className="relative h-12 w-12 rounded-full overflow-hidden">
                         <Image
                           src={testimonial.image}
                           alt={testimonial.name}
@@ -103,9 +101,8 @@ export function TestimonialsSection() {
                         />
                       </div>
                       <div className="text-left">
-                        <p className="font-semibold">{testimonial.name}</p>
-                        <p className="text-sm text-background/60">{testimonial.location}</p>
-                        <p className="text-xs text-primary">Purchased: {testimonial.product}</p>
+                        <p className="font-medium text-sm">{testimonial.name}</p>
+                        <p className="text-xs text-muted-foreground">{testimonial.location}</p>
                       </div>
                     </div>
                   </div>
@@ -117,30 +114,30 @@ export function TestimonialsSection() {
           {/* Navigation */}
           <button
             onClick={prevTestimonial}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 p-3 rounded-full bg-background/10 hover:bg-background/20 transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 p-2 hover:bg-muted rounded-full transition-colors"
             aria-label="Previous testimonial"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={nextTestimonial}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 p-3 rounded-full bg-background/10 hover:bg-background/20 transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 p-2 hover:bg-muted rounded-full transition-colors"
             aria-label="Next testimonial"
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-5 w-5" />
           </button>
 
           {/* Dots */}
-          <div className="flex justify-center gap-2 mt-8">
+          <div className="flex justify-center gap-2 mt-10">
             {testimonials.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={cn(
-                  'w-2 h-2 rounded-full transition-all',
+                  'h-1.5 rounded-full transition-all',
                   index === currentIndex
-                    ? 'bg-primary w-6'
-                    : 'bg-background/30 hover:bg-background/50'
+                    ? 'bg-foreground w-8'
+                    : 'bg-foreground/20 w-4 hover:bg-foreground/40'
                 )}
                 aria-label={`Go to testimonial ${index + 1}`}
               />

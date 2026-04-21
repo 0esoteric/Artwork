@@ -4,64 +4,64 @@ import { ArrowRight } from 'lucide-react'
 
 const categories = [
   {
-    name: 'Madhubani',
-    slug: 'madhubani',
-    description: 'Intricate patterns from Bihar',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&q=80',
-    productCount: 45,
+    name: 'T-Shirts',
+    slug: 'tshirts',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80',
+    productCount: 124,
   },
   {
-    name: 'Warli',
-    slug: 'warli',
-    description: 'Tribal art from Maharashtra',
-    image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=600&q=80',
-    productCount: 32,
+    name: 'Hoodies',
+    slug: 'hoodies',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80',
+    productCount: 86,
   },
   {
-    name: 'Gond',
-    slug: 'gond',
-    description: 'Forest-inspired tribal art',
-    image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&q=80',
-    productCount: 28,
+    name: 'Jackets',
+    slug: 'jackets',
+    image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80',
+    productCount: 58,
   },
   {
-    name: 'Kalamkari',
-    slug: 'kalamkari',
-    description: 'Ancient pen art from Andhra',
-    image: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&q=80',
-    productCount: 38,
+    name: 'Pants',
+    slug: 'pants',
+    image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&q=80',
+    productCount: 92,
   },
   {
-    name: 'Pichwai',
-    slug: 'pichwai',
-    description: 'Temple art from Rajasthan',
-    image: 'https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=600&q=80',
-    productCount: 24,
+    name: 'Shirts',
+    slug: 'shirts',
+    image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80',
+    productCount: 78,
   },
   {
-    name: 'Pattachitra',
-    slug: 'pattachitra',
-    description: 'Scroll paintings from Odisha',
-    image: 'https://images.unsplash.com/photo-1549887534-1541e9326642?w=600&q=80',
-    productCount: 31,
+    name: 'Accessories',
+    slug: 'accessories',
+    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80',
+    productCount: 156,
   },
 ]
 
 export function CategoriesSection() {
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <p className="text-primary font-medium tracking-wider uppercase mb-2">
-            Discover Our Collections
-          </p>
-          <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4">
-            Shop by Art Form
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Explore India&apos;s rich artistic heritage through our curated collections of traditional art forms
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
+          <div>
+            <p className="text-muted-foreground text-sm tracking-[0.2em] uppercase mb-2">
+              Browse
+            </p>
+            <h2 className="text-4xl md:text-5xl font-serif">
+              Shop by Category
+            </h2>
+          </div>
+          <Link 
+            href="/shop"
+            className="mt-4 sm:mt-0 text-sm font-medium tracking-wide uppercase hover:underline underline-offset-4 flex items-center gap-2"
+          >
+            View All
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
         {/* Categories Grid */}
@@ -69,29 +69,28 @@ export function CategoriesSection() {
           {categories.map((category, index) => (
             <Link
               key={category.slug}
-              href={`/shop?artform=${category.slug}`}
-              className={`group relative overflow-hidden rounded-lg ${
-                index === 0 ? 'md:col-span-2 md:row-span-2 aspect-square md:aspect-auto' : 'aspect-square'
+              href={`/shop?category=${category.slug}`}
+              className={`group relative overflow-hidden bg-muted ${
+                index === 0 ? 'md:col-span-2 md:row-span-2 aspect-square md:aspect-auto min-h-[300px] md:min-h-[500px]' : 'aspect-[4/5]'
               }`}
             >
               <Image
                 src={category.image}
                 alt={category.name}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/20 to-transparent" />
               
               {/* Content */}
-              <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                <h3 className="text-xl md:text-2xl font-serif font-bold text-background mb-1">
+              <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
+                <h3 className={`font-serif text-background mb-1 ${
+                  index === 0 ? 'text-3xl md:text-4xl' : 'text-xl md:text-2xl'
+                }`}>
                   {category.name}
                 </h3>
-                <p className="text-sm text-background/70 mb-2 hidden sm:block">
-                  {category.description}
-                </p>
-                <div className="flex items-center gap-2 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span>{category.productCount} Artworks</span>
+                <div className="flex items-center gap-2 text-background/80 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span>{category.productCount} Products</span>
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>

@@ -1,8 +1,14 @@
 import type { Metadata, Viewport } from 'next'
-import { Playfair_Display, Cormorant_Garamond } from 'next/font/google'
+import { Inter, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import './globals.css'
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
 
 const playfair = Playfair_Display({ 
   subsets: ['latin'],
@@ -10,31 +16,24 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-const cormorant = Cormorant_Garamond({ 
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-cormorant',
-  display: 'swap',
-})
-
 export const metadata: Metadata = {
-  title: 'Artisan Haven | Handmade Artworks & Traditional Indian Art',
-  description: 'Discover authentic handmade artworks from master artisans across India. Shop Madhubani, Warli, Gond, Kalamkari, Pichwai, and more traditional art forms.',
-  keywords: ['handmade art', 'Indian art', 'Madhubani', 'Warli', 'Gond', 'Kalamkari', 'Pichwai', 'traditional art', 'artisan', 'handcrafted'],
-  authors: [{ name: 'Artisan Haven' }],
-  creator: 'Artisan Haven',
+  title: 'VELURA | Modern Fashion & Clothing',
+  description: 'Discover curated contemporary fashion. Premium clothing for the modern individual. Shop the latest trends in streetwear, casual wear, and designer collections.',
+  keywords: ['fashion', 'clothing', 'streetwear', 'modern fashion', 'designer clothes', 'menswear', 'womenswear', 'contemporary style'],
+  authors: [{ name: 'VELURA' }],
+  creator: 'VELURA',
   openGraph: {
     type: 'website',
-    locale: 'en_IN',
-    url: 'https://artisanhaven.com',
-    siteName: 'Artisan Haven',
-    title: 'Artisan Haven | Handmade Artworks & Traditional Indian Art',
-    description: 'Discover authentic handmade artworks from master artisans across India.',
+    locale: 'en_US',
+    url: 'https://velura.com',
+    siteName: 'VELURA',
+    title: 'VELURA | Modern Fashion & Clothing',
+    description: 'Discover curated contemporary fashion. Premium clothing for the modern individual.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Artisan Haven | Handmade Artworks',
-    description: 'Discover authentic handmade artworks from master artisans across India.',
+    title: 'VELURA | Modern Fashion',
+    description: 'Discover curated contemporary fashion. Premium clothing for the modern individual.',
   },
   icons: {
     icon: [
@@ -56,7 +55,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#8B4513',
+  themeColor: '#0a0a0a',
   width: 'device-width',
   initialScale: 1,
 }
@@ -67,7 +66,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${cormorant.variable} bg-background`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} bg-background`}>
       <body className="font-sans antialiased min-h-screen">
         {children}
         <Toaster position="top-center" richColors />

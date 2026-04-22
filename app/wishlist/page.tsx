@@ -3,8 +3,8 @@ import { Footer } from '@/components/layout/footer'
 import { WishlistContent } from '@/components/wishlist/wishlist-content'
 
 export const metadata = {
-  title: 'Wishlist | Artisan Haven',
-  description: 'Your saved artworks',
+  title: 'Wishlist | VELURA',
+  description: 'Your saved items',
 }
 
 export default function WishlistPage() {

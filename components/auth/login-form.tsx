@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
-import { Palette, Mail, Lock, Loader2, AlertCircle } from "lucide-react"
+import { ShoppingBag, Mail, Lock, Loader2, AlertCircle } from "lucide-react"
 
 export function LoginForm() {
   const router = useRouter()
@@ -63,8 +63,8 @@ export function LoginForm() {
     <Card className="w-full max-w-md shadow-xl border-0">
       <CardHeader className="text-center space-y-4 pb-2">
         <Link href="/" className="inline-flex items-center justify-center gap-2 mx-auto">
-          <Palette className="h-8 w-8 text-primary" />
-          <span className="font-serif text-2xl font-bold">Artisan Gallery</span>
+          <ShoppingBag className="h-8 w-8 text-primary" />
+          <span className="font-serif text-2xl font-bold">VELURA</span>
         </Link>
         <div>
           <CardTitle className="text-2xl font-serif">Welcome Back</CardTitle>

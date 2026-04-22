@@ -26,10 +26,10 @@ interface ProductDetailProps {
     shortDescription: string
     price: number
     comparePrice: number | null
-    artist: string
-    artistSlug: string
-    artistBio?: string | null
-    artForm: string
+    category: string
+    collection?: string | null
+    sizes: string[]
+    colors: string[]
     dimensions: string
     medium: string
     images: string[]
@@ -189,7 +189,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <div className="max-w-lg">
             {/* Category */}
             <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-3">
-              {product.artForm || 'Clothing'}
+              {product.category || 'Clothing'}
             </p>
 
             {/* Title */}

@@ -2,8 +2,8 @@ import { Suspense } from "react"
 import { LoginForm } from "@/components/auth/login-form"
 
 export const metadata = {
-  title: "Login | Artisan Gallery",
-  description: "Sign in to your Artisan Gallery account",
+  title: "Login | VELURA",
+  description: "Sign in to your VELURA account",
 }
 
 export default function LoginPage() {

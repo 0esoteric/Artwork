@@ -2,8 +2,8 @@ import { Suspense } from "react"
 import { RegisterForm } from "@/components/auth/register-form"
 
 export const metadata = {
-  title: "Create Account | Artisan Gallery",
-  description: "Create your Artisan Gallery account to start shopping",
+  title: "Create Account | VELURA",
+  description: "Create your VELURA account to start shopping",
 }
 
 export default function RegisterPage() {

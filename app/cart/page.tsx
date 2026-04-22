@@ -3,8 +3,8 @@ import { Footer } from '@/components/layout/footer'
 import { CartContent } from '@/components/cart/cart-content'
 
 export const metadata = {
-  title: 'Shopping Cart | Artisan Haven',
-  description: 'View and manage your shopping cart',
+  title: 'Shopping Bag | VELURA',
+  description: 'View and manage your shopping bag',
 }
 
 export default function CartPage() {

@@ -9,74 +9,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
-// Mock orders data
-const orders = [
-  {
-    id: 'ORD-2024-001',
-    date: '2024-01-15',
-    status: 'delivered',
-    total: 27000,
-    items: [
-      {
-        id: 1,
-        name: 'Tree of Life in Madhubani',
-        artist: 'Ambika Devi',
-        price: 15000,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=200&q=80',
-      },
-      {
-        id: 2,
-        name: 'Dancing Peacocks in Gond',
-        artist: 'Sandeep Dhurve',
-        price: 12000,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=200&q=80',
-      },
-    ],
-    shippingAddress: '123 Main St, Mumbai, Maharashtra - 400001',
-  },
-  {
-    id: 'ORD-2024-002',
-    date: '2024-01-20',
-    status: 'shipped',
-    total: 45000,
-    items: [
-      {
-        id: 4,
-        name: 'Krishna Leela Pichwai',
-        artist: 'Master Artist',
-        price: 45000,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=200&q=80',
-      },
-    ],
-    shippingAddress: '456 Park Ave, Delhi - 110001',
-    trackingId: 'TRACK123456789',
-  },
-  {
-    id: 'ORD-2024-003',
-    date: '2024-01-25',
-    status: 'processing',
-    total: 8500,
-    items: [
-      {
-        id: 3,
-        name: 'Village Life Warli',
-        artist: 'Dilip Bahotha',
-        price: 8500,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=200&q=80',
-      },
-    ],
-    shippingAddress: '789 Lake View, Bangalore - 560001',
-  },
-]
+
 
 function formatPrice(price: number) {
-  return new Intl.NumberFormat('en-IN', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'INR',
+    currency: 'USD',
     maximumFractionDigits: 0,
   }).format(price)
 }
@@ -166,10 +104,10 @@ export function OrdersContent() {
           <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">No orders yet</h2>
           <p className="text-muted-foreground mb-6">
-            Start exploring our collection of handmade artworks
+            Start exploring our collection of premium clothing
           </p>
           <Button asChild>
-            <Link href="/shop">Browse Artworks</Link>
+            <Link href="/shop">Browse Collection</Link>
           </Button>
         </div>
       ) : (

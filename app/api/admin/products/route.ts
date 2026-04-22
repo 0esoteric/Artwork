@@ -15,11 +15,11 @@ export async function GET() {
 
   try {
     const sql = `
-      SELECT p.*, pi.image_url as image, c.name as category_name, a.name as artist_name
+      SELECT p.*, pi.image_url as image, c.name as category_name, col.name as collection_name
       FROM products p 
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = 1
       LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN artists a ON p.artist_id = a.id
+      LEFT JOIN collections col ON p.collection_id = col.id
       ORDER BY p.created_at DESC
     `
     const products = await query(sql)
@@ -45,18 +45,21 @@ export async function POST(request: Request) {
       compare_price, 
       stock_quantity, 
       category_id, 
-      artist_id,
-      dimensions,
-      medium,
-      art_form,
+      collection_id,
+      // Clothing specific fields
+      sizes,
+      colors,
+      material,
+      fit,
+      care_instructions,
+      // Shipping fields
       shipment_time,
       coupon_code,
       coupon_discount,
-      about_artist,
       shipping_details,
       return_policy,
       is_featured,
-      is_ready_to_ship,
+      is_new_arrival,
       is_active,
       images 
     } = body
@@ -69,15 +72,15 @@ export async function POST(request: Request) {
       .replace(/\s+/g, '-')
       .replace(/[^\w-]/g, '') + '-' + Math.random().toString(36).substring(2, 7)
     
-    // Insert product with all fields
+    // Insert product with all clothing fields
     const productResult: any = await query(
       `INSERT INTO products (
         name, slug, description, short_description, price, compare_price, 
-        stock_quantity, category_id, artist_id, dimensions, medium, art_form,
-        shipment_time, coupon_code, coupon_discount, about_artist, 
-        shipping_details, return_policy, is_featured, is_ready_to_ship, 
+        stock_quantity, category_id, collection_id, sizes, colors, material, fit,
+        care_instructions, shipment_time, coupon_code, coupon_discount,
+        shipping_details, return_policy, is_featured, is_new_arrival, 
         is_active, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         name, 
         slug, 
@@ -87,18 +90,19 @@ export async function POST(request: Request) {
         compare_price || null, 
         stock_quantity || 0, 
         category_id || null,
-        artist_id || null,
-        dimensions || null,
-        medium || null,
-        art_form || null,
-        shipment_time || '7-10 business days',
+        collection_id || null,
+        sizes ? JSON.stringify(sizes) : null,
+        colors ? JSON.stringify(colors) : null,
+        material || null,
+        fit || 'Regular',
+        care_instructions || 'Machine wash cold. Do not bleach. Tumble dry low.',
+        shipment_time || '3-5 business days',
         coupon_code || null,
         coupon_discount || 0,
-        about_artist || null,
-        shipping_details || 'Free shipping on orders above Rs. 999. Standard delivery within 7-10 business days.',
-        return_policy || '7-day return policy. Items must be unused and in original packaging.',
+        shipping_details || 'Free shipping on orders over $100. Standard delivery within 3-5 business days.',
+        return_policy || '30-day return policy. Items must be unworn with original tags.',
         is_featured ? 1 : 0,
-        is_ready_to_ship ? 1 : 0,
+        is_new_arrival ? 1 : 0,
         is_active !== false ? 1 : 0
       ]
     )

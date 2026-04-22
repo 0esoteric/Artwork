@@ -9,19 +9,20 @@ export interface CartItem {
   slug: string
   price: number
   comparePrice: number | null
-  artist: string
-  artForm: string
-  dimensions: string
+  category: string
+  size?: string
+  color?: string
+  material?: string
   image: string
   quantity: number
-  isReadyToShip: boolean
+  isNewArrival: boolean
 }
 
 interface CartStore {
   items: CartItem[]
   addItem: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void
-  removeItem: (id: number) => void
-  updateQuantity: (id: number, quantity: number) => void
+  removeItem: (id: number, size?: string, color?: string) => void
+  updateQuantity: (id: number, quantity: number, size?: string, color?: string) => void
   clearCart: () => void
   getSubtotal: () => number
   getItemCount: () => number
@@ -34,12 +35,17 @@ export const useCartStore = create<CartStore>()(
       
       addItem: (item, quantity = 1) => {
         set((state) => {
-          const existingItem = state.items.find((i) => i.id === item.id)
+          // Check for existing item with same id, size, and color
+          const existingItem = state.items.find(
+            (i) => i.id === item.id && i.size === item.size && i.color === item.color
+          )
           
           if (existingItem) {
             return {
               items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i
+                i.id === item.id && i.size === item.size && i.color === item.color
+                  ? { ...i, quantity: i.quantity + quantity }
+                  : i
               ),
             }
           }
@@ -50,21 +56,25 @@ export const useCartStore = create<CartStore>()(
         })
       },
       
-      removeItem: (id) => {
+      removeItem: (id, size, color) => {
         set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
+          items: state.items.filter(
+            (i) => !(i.id === id && i.size === size && i.color === color)
+          ),
         }))
       },
       
-      updateQuantity: (id, quantity) => {
+      updateQuantity: (id, quantity, size, color) => {
         if (quantity < 1) {
-          get().removeItem(id)
+          get().removeItem(id, size, color)
           return
         }
         
         set((state) => ({
           items: state.items.map((i) =>
-            i.id === id ? { ...i, quantity } : i
+            i.id === id && i.size === size && i.color === color
+              ? { ...i, quantity }
+              : i
           ),
         }))
       },
@@ -82,7 +92,7 @@ export const useCartStore = create<CartStore>()(
       },
     }),
     {
-      name: 'artisan-haven-cart',
+      name: 'velura-cart',
     }
   )
 )

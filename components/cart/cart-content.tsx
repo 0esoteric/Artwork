@@ -25,11 +25,12 @@ const demoItems = [
     slug: 'essential-cotton-tee',
     price: 45,
     comparePrice: null,
-    artist: 'THREADS',
-    artForm: 'T-Shirts',
-    dimensions: 'Size M',
+    category: 'T-Shirts',
+    size: 'M',
+    color: 'Black',
+    material: '100% Cotton',
     image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80',
-    isReadyToShip: true,
+    isNewArrival: true,
   },
   {
     id: 2,
@@ -37,11 +38,12 @@ const demoItems = [
     slug: 'classic-pullover-hoodie',
     price: 89,
     comparePrice: 120,
-    artist: 'THREADS',
-    artForm: 'Hoodies',
-    dimensions: 'Size L',
+    category: 'Hoodies',
+    size: 'L',
+    color: 'Navy',
+    material: 'Cotton Blend',
     image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80',
-    isReadyToShip: true,
+    isNewArrival: false,
   },
 ]
 
@@ -175,7 +177,7 @@ export function CartContent() {
                             {item.name}
                           </Link>
                           <p className="text-sm text-muted-foreground mt-1">
-                            {item.artForm} {item.dimensions && `/ ${item.dimensions}`}
+                            {item.category} {item.size && `/ Size ${item.size}`} {item.color && `/ ${item.color}`}
                           </p>
                         </div>
                         <button

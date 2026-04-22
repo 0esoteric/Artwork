@@ -11,9 +11,9 @@ import { useWishlistStore } from '@/lib/wishlist-store'
 import { useState, useEffect } from 'react'
 
 function formatPrice(price: number) {
-  return new Intl.NumberFormat('en-IN', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'INR',
+    currency: 'USD',
     maximumFractionDigits: 0,
   }).format(price)
 }
@@ -29,14 +29,14 @@ export function WishlistContent() {
 
   const handleAddToCart = (item: any) => {
     addToCart(item, 1)
-    toast.success('Added to cart')
+    toast.success('Added to bag')
   }
 
   const shareWishlist = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'My Wishlist - Artisan Haven',
-        text: 'Check out my wishlist of handmade artworks!',
+        title: 'My Wishlist - VELURA',
+        text: 'Check out my wishlist!',
         url: window.location.href,
       })
     } else {
@@ -87,10 +87,10 @@ export function WishlistContent() {
           <Heart className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">Your wishlist is empty</h2>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Save your favorite artworks to your wishlist and they&apos;ll appear here
+            Save your favorite items to your wishlist and they&apos;ll appear here
           </p>
           <Button asChild>
-            <Link href="/shop">Browse Artworks</Link>
+            <Link href="/shop">Browse Collection</Link>
           </Button>
         </div>
       ) : (
@@ -113,9 +113,9 @@ export function WishlistContent() {
 
                   {/* Badges */}
                   <div className="absolute top-3 left-3 flex flex-col gap-2">
-                    {item.isReadyToShip && (
+                    {item.isNewArrival && (
                       <Badge className="bg-accent text-accent-foreground text-xs">
-                        Ready to Ship
+                        New Arrival
                       </Badge>
                     )}
                     {discount && (
@@ -142,7 +142,7 @@ export function WishlistContent() {
                 {/* Content */}
                 <div className="p-4">
                   <p className="text-xs text-primary font-medium uppercase tracking-wider">
-                    {item.artForm}
+                    {item.category}
                   </p>
                   <Link href={`/product/${item.slug}`}>
                     <h3 className="font-medium mt-1 hover:text-primary transition-colors line-clamp-2">
@@ -150,10 +150,7 @@ export function WishlistContent() {
                     </h3>
                   </Link>
                   <p className="text-sm text-muted-foreground mt-1">
-                    by {item.artist}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {item.dimensions}
+                    {item.material}
                   </p>
 
                   {/* Price */}
@@ -173,7 +170,7 @@ export function WishlistContent() {
                       onClick={() => handleAddToCart(item)}
                     >
                       <ShoppingBag className="h-4 w-4" />
-                      Add to Cart
+                      Add to Bag
                     </Button>
                   </div>
                 </div>

@@ -9,11 +9,12 @@ export interface WishlistItem {
   slug: string
   price: number
   comparePrice: number | null
-  artist: string
-  artForm: string
-  dimensions: string
+  category: string
+  sizes?: string[]
+  colors?: string[]
+  material?: string
   image: string
-  isReadyToShip: boolean
+  isNewArrival: boolean
 }
 
 interface WishlistStore {
@@ -57,7 +58,7 @@ export const useWishlistStore = create<WishlistStore>()(
       },
     }),
     {
-      name: 'artisan-haven-wishlist',
+      name: 'velura-wishlist',
     }
   )
 )

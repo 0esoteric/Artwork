@@ -20,9 +20,9 @@ const PLACEHOLDER_IMAGE = "/placeholder.svg"
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 function formatPrice(price: number) {
-  return new Intl.NumberFormat('en-IN', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'INR',
+    currency: 'USD',
     maximumFractionDigits: 0,
   }).format(price)
 }
@@ -157,8 +157,8 @@ export function CheckoutContent() {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_demo',
           amount: total * 100, // Amount in paise
           currency: 'INR',
-          name: 'Artisan Haven',
-          description: 'Purchase of handmade artworks',
+          name: 'VELURA',
+          description: 'Purchase of premium clothing',
           handler: async function (response: RazorpayResponse) {
             // Save order to DB
             const orderRes = await fetch('/api/orders', {
@@ -437,7 +437,7 @@ export function CheckoutContent() {
                        <div>
                          <p className="font-medium">Cash on Delivery</p>
                          <p className="text-sm text-muted-foreground">
-                           Pay when you receive the artwork
+                           Pay when you receive your order
                          </p>
                        </div>
                        <Truck className="h-6 w-6 text-primary" />
@@ -502,7 +502,7 @@ export function CheckoutContent() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm line-clamp-1">{item.name}</p>
-                    <p className="text-xs text-muted-foreground">{item.artForm}</p>
+                    <p className="text-xs text-muted-foreground">{item.category}</p>
                     <p className="text-sm font-medium mt-1">{formatPrice(item.price * item.quantity)}</p>
                   </div>
                 </div>

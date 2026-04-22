@@ -3,7 +3,7 @@ import { Footer } from '@/components/layout/footer'
 import { CheckoutContent } from '@/components/checkout/checkout-content'
 
 export const metadata = {
-  title: 'Checkout | Artisan Haven',
+  title: 'Checkout | VELURA',
   description: 'Complete your purchase securely',
 }
 

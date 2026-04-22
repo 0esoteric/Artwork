@@ -7,22 +7,24 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q') || ''
   const category = searchParams.get('category') || ''
-  const artForm = searchParams.get('artForm') || ''
+  const collection = searchParams.get('collection') || ''
+  const size = searchParams.get('size') || ''
+  const color = searchParams.get('color') || ''
   const minPrice = parseFloat(searchParams.get('minPrice') || '0')
   const maxPrice = parseFloat(searchParams.get('maxPrice') || '1000000')
   const isFeatured = searchParams.get('featured') === 'true'
-  const isReadyToShip = searchParams.get('readyToShip') === 'true'
+  const isNewArrival = searchParams.get('newArrival') === 'true'
 
   try {
     let sql = `
       SELECT p.*, 
              COALESCE(pi.image_url, '${PLACEHOLDER_IMAGE}') as image,
              c.name as category_name,
-             a.name as artist_name
+             col.name as collection_name
       FROM products p 
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = 1
       LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN artists a ON p.artist_id = a.id
+      LEFT JOIN collections col ON p.collection_id = col.id
       WHERE p.is_active = 1
     `
     const params: any[] = []
@@ -33,13 +35,25 @@ export async function GET(request: Request) {
     }
 
     if (category) {
-      sql += ` AND p.category_id = (SELECT id FROM categories WHERE slug = ?)`
-      params.push(category)
+      sql += ` AND (c.slug = ? OR c.id = ?)`
+      params.push(category, category)
     }
 
-    if (artForm) {
-      sql += ` AND LOWER(p.art_form) = LOWER(?)`
-      params.push(artForm)
+    if (collection) {
+      sql += ` AND (col.slug = ? OR col.id = ?)`
+      params.push(collection, collection)
+    }
+
+    if (size) {
+      // Size is stored as JSON array, search within it
+      sql += ` AND p.sizes LIKE ?`
+      params.push(`%${size}%`)
+    }
+
+    if (color) {
+      // Color is stored as JSON array, search within it
+      sql += ` AND p.colors LIKE ?`
+      params.push(`%${color}%`)
     }
 
     if (minPrice) {
@@ -56,8 +70,8 @@ export async function GET(request: Request) {
       sql += ` AND p.is_featured = 1`
     }
 
-    if (isReadyToShip) {
-      sql += ` AND p.is_ready_to_ship = 1`
+    if (isNewArrival) {
+      sql += ` AND p.is_new_arrival = 1`
     }
 
     sql += ` ORDER BY p.created_at DESC`

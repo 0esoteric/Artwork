@@ -67,7 +67,6 @@ const collectionTypes = [
 
 const PLACEHOLDER_IMAGE = "/placeholder.svg"
 
-// This uses the existing artists API but displays it as collections
 export default function AdminCollectionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -83,23 +82,9 @@ export default function AdminCollectionsPage() {
   const fetchCollections = async () => {
     setIsLoading(true)
     try {
-      // Using the existing artists endpoint but treating data as collections
-      const res = await fetch('/api/admin/artists')
+      const res = await fetch('/api/admin/collections')
       const data = await res.json()
-      // Map artists data to collection format
-      const mapped = (data.artists || []).map((a: any) => ({
-        id: a.id,
-        name: a.name,
-        slug: a.slug,
-        description: a.bio,
-        image_url: a.image_url,
-        type: a.art_form || "style",
-        is_featured: a.is_featured,
-        is_active: a.is_active,
-        product_count: a.product_count || 0,
-        created_at: a.created_at,
-      }))
-      setCollections(mapped)
+      setCollections(data.collections || [])
     } catch (error) {
       console.error('Failed to fetch collections:', error)
     } finally {
@@ -119,15 +104,14 @@ export default function AdminCollectionsPage() {
     
     setIsSaving(true)
     try {
-      // Map to artists API format
-      const res = await fetch('/api/admin/artists', {
+      const res = await fetch('/api/admin/collections', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: newCollection.name,
-          bio: newCollection.description,
+          description: newCollection.description,
           image_url: newCollection.image_url,
-          art_form: newCollection.type,
+          type: newCollection.type,
           is_featured: newCollection.is_featured,
           is_active: newCollection.is_active,
         }),
@@ -156,14 +140,14 @@ export default function AdminCollectionsPage() {
     
     setIsSaving(true)
     try {
-      const res = await fetch(`/api/admin/artists/${editingCollection.id}`, {
+      const res = await fetch(`/api/admin/collections/${editingCollection.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: editCollection.name,
-          bio: editCollection.description,
+          description: editCollection.description,
           image_url: editCollection.image_url,
-          art_form: editCollection.type,
+          type: editCollection.type,
           is_featured: editCollection.is_featured,
           is_active: editCollection.is_active,
         }),
@@ -200,7 +184,7 @@ export default function AdminCollectionsPage() {
   const handleDeleteCollection = async (id: number) => {
     if (!confirm('Are you sure you want to delete this collection?')) return
     try {
-      const res = await fetch(`/api/admin/artists/${id}`, {
+      const res = await fetch(`/api/admin/collections/${id}`, {
         method: 'DELETE',
       })
       const data = await res.json()

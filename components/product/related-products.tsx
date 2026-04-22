@@ -17,20 +17,20 @@ const PLACEHOLDER_IMAGE = "/placeholder.svg"
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 function formatPrice(price: number) {
-  return new Intl.NumberFormat('en-IN', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'INR',
+    currency: 'USD',
     maximumFractionDigits: 0,
   }).format(price)
 }
 
 interface RelatedProductsProps {
   currentProductId: number
-  artForm: string
+  category: string
 }
 
-export function RelatedProducts({ currentProductId, artForm }: RelatedProductsProps) {
-  const { data, isLoading } = useSWR(`/api/products?artForm=${encodeURIComponent(artForm)}`, fetcher)
+export function RelatedProducts({ currentProductId, category }: RelatedProductsProps) {
+  const { data, isLoading } = useSWR(`/api/products?category=${encodeURIComponent(category)}`, fetcher)
   const { addItem } = useCartStore()
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const [mounted, setMounted] = useState(false)
@@ -39,7 +39,7 @@ export function RelatedProducts({ currentProductId, artForm }: RelatedProductsPr
     setMounted(true)
   }, [])
   
-  // Filter to show related products (same art form, excluding current)
+  // Filter to show related products (same category, excluding current)
   const relatedProducts = (data?.products || [])
     .filter((p: any) => p.id !== currentProductId)
     .slice(0, 4)
@@ -109,9 +109,9 @@ export function RelatedProducts({ currentProductId, artForm }: RelatedProductsPr
                 
                 {/* Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-2">
-                  {product.is_ready_to_ship && (
+                  {product.is_new_arrival && (
                     <Badge className="bg-accent text-accent-foreground text-xs">
-                      Ready to Ship
+                      New Arrival
                     </Badge>
                   )}
                   {discount && (
@@ -133,7 +133,7 @@ export function RelatedProducts({ currentProductId, artForm }: RelatedProductsPr
                   </Button>
                 </div>
 
-                {/* Add to Cart */}
+                {/* Add to Bag */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform">
                   <Button 
                     className="w-full gap-2" 
@@ -141,19 +141,19 @@ export function RelatedProducts({ currentProductId, artForm }: RelatedProductsPr
                     onClick={(e) => {
                       e.preventDefault()
                       addItem(product)
-                      toast.success(`${product.name} added to cart`)
+                      toast.success(`${product.name} added to bag`)
                     }}
                     disabled={product.stock_quantity === 0}
                   >
                     <ShoppingBag className="h-4 w-4" />
-                    {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                    {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Bag'}
                   </Button>
                 </div>
               </div>
 
               <div className="mt-4 space-y-1">
                 <p className="text-xs text-primary font-medium uppercase tracking-wider">
-                  {product.art_form || product.category_name || 'Handmade'}
+                  {product.category_name || 'Clothing'}
                 </p>
                 <Link href={`/product/${product.slug}`}>
                   <h3 className="font-medium text-foreground hover:text-primary transition-colors line-clamp-2">
@@ -161,7 +161,7 @@ export function RelatedProducts({ currentProductId, artForm }: RelatedProductsPr
                   </h3>
                 </Link>
                 <p className="text-sm text-muted-foreground">
-                  by {product.artist_name || 'Artisan Haven'}
+                  {product.material || 'Premium Quality'}
                 </p>
                 <div className="flex items-center gap-2 pt-1">
                   <span className="font-semibold">{formatPrice(product.price)}</span>

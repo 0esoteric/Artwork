@@ -4,7 +4,7 @@ import { Footer } from '@/components/layout/footer'
 import { OrdersContent } from '@/components/orders/orders-content'
 
 export const metadata = {
-  title: 'My Orders | Artisan Haven',
+  title: 'My Orders | VELURA',
   description: 'Track and manage your orders',
 }
 

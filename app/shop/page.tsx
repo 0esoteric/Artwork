@@ -5,8 +5,8 @@ import { ShopContent } from '@/components/shop/shop-content'
 import { ShopSkeleton } from '@/components/shop/shop-skeleton'
 
 export const metadata = {
-  title: 'Shop Handmade Artworks | Artisan Haven',
-  description: 'Browse our collection of authentic handmade artworks from master artisans across India.',
+  title: 'Shop | VELURA',
+  description: 'Browse our collection of premium clothing and apparel. Find the latest styles in t-shirts, hoodies, jackets, and more.',
 }
 
 export default function ShopPage() {

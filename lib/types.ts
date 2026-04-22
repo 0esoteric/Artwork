@@ -24,15 +24,13 @@ export interface Category {
   created_at: Date
 }
 
-export interface Artist {
+export interface Collection {
   id: number
   name: string
   slug: string
-  bio?: string
+  description?: string
   image_url?: string
-  location?: string
-  art_form?: string
-  awards?: string
+  type: 'style' | 'seasonal' | 'occasion' | 'collaboration'
   is_featured: boolean
   is_active: boolean
   created_at: Date
@@ -49,25 +47,28 @@ export interface Product {
   sku?: string
   stock_quantity: number
   category_id?: number
-  artist_id?: number
-  dimensions?: string
-  medium?: string
-  art_form?: string
+  collection_id?: number
+  // Clothing specific fields
+  sizes?: string // JSON array of available sizes e.g. ["S", "M", "L", "XL"]
+  colors?: string // JSON array of available colors e.g. ["black", "white", "navy"]
+  material?: string
+  fit?: string // e.g. "Regular", "Slim", "Oversized"
+  care_instructions?: string
+  // General fields
   is_featured: boolean
-  is_ready_to_ship: boolean
+  is_new_arrival: boolean
   is_active: boolean
   created_at: Date
   updated_at: Date
-  // New enhanced fields
+  // Shipping fields
   shipment_time?: string
   coupon_code?: string
   coupon_discount?: number
-  about_artist?: string
   shipping_details?: string
   return_policy?: string
   // Joined fields
   category_name?: string
-  artist_name?: string
+  collection_name?: string
   images?: ProductImage[]
   image?: string // Primary image URL for convenience
 }
@@ -110,6 +111,8 @@ export interface CartItem {
   session_id?: string
   product_id: number
   quantity: number
+  size?: string
+  color?: string
   created_at: Date
   updated_at: Date
   product?: Product
@@ -148,6 +151,8 @@ export interface OrderItem {
   quantity: number
   price: number
   total: number
+  size?: string
+  color?: string
   created_at: Date
 }
 

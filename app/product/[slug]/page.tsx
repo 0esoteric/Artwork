@@ -4,7 +4,6 @@ import { Footer } from '@/components/layout/footer'
 import { ProductDetail } from '@/components/product/product-detail'
 import { RelatedProducts } from '@/components/product/related-products'
 
-// Mock product data - in production, fetch from database
 import { query } from '@/lib/db'
 
 const PLACEHOLDER_IMAGE = "/placeholder.svg"
@@ -12,10 +11,10 @@ const PLACEHOLDER_IMAGE = "/placeholder.svg"
 async function getProduct(slug: string) {
   try {
     const products: any[] = await query(
-      `SELECT p.*, c.name as category_name, a.name as artist_name, a.slug as artist_slug, a.bio as artist_bio
+      `SELECT p.*, c.name as category_name, col.name as collection_name
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
-       LEFT JOIN artists a ON p.artist_id = a.id
+       LEFT JOIN collections col ON p.collection_id = col.id
        WHERE p.slug = ?`,
       [slug]
     )
@@ -30,34 +29,35 @@ async function getProduct(slug: string) {
       [product.id]
     )
 
-    // Fetch tags
-    const tags: any[] = await query(
-      `SELECT t.name FROM product_tags t
-       JOIN product_tag_relations ptr ON t.id = ptr.tag_id
-       WHERE ptr.product_id = ?`,
-      [product.id]
-    )
+    // Parse sizes and colors from JSON
+    let sizes: string[] = []
+    let colors: string[] = []
+    try {
+      sizes = product.sizes ? JSON.parse(product.sizes) : []
+      colors = product.colors ? JSON.parse(product.colors) : []
+    } catch (e) {
+      // If parsing fails, use defaults
+    }
 
     return {
       ...product,
       images: images.length > 0 ? images.map(img => img.image_url) : [PLACEHOLDER_IMAGE],
-      artist: product.artist_name || 'Artisan Haven',
-      artistSlug: product.artist_slug || 'artisan-haven',
-      artistBio: product.about_artist || product.artist_bio || null,
-      artForm: product.art_form || 'Handmade',
-      medium: product.medium || 'Traditional',
-      dimensions: product.dimensions || 'Standard',
-      shortDescription: product.short_description || product.description?.substring(0, 160) || 'Handmade artwork from India',
-      tags: tags.map(t => t.name) || [],
-      isReadyToShip: Boolean(product.is_ready_to_ship),
+      category: product.category_name || 'Clothing',
+      collection: product.collection_name || null,
+      sizes: sizes.length > 0 ? sizes : ['S', 'M', 'L', 'XL'],
+      colors: colors.length > 0 ? colors : ['black', 'white', 'navy'],
+      material: product.material || '100% Cotton',
+      fit: product.fit || 'Regular Fit',
+      careInstructions: product.care_instructions || 'Machine wash cold. Do not bleach. Tumble dry low.',
+      shortDescription: product.short_description || product.description?.substring(0, 160) || 'Premium quality clothing',
+      isNewArrival: Boolean(product.is_new_arrival),
       isBestseller: Boolean(product.is_featured),
       stockQuantity: product.stock_quantity || 0,
-      // New fields
-      shipmentTime: product.shipment_time || '7-10 business days',
+      shipmentTime: product.shipment_time || '3-5 business days',
       couponCode: product.coupon_code || null,
       couponDiscount: product.coupon_discount || 0,
-      shippingDetails: product.shipping_details || 'Free shipping on orders above Rs. 999. Standard delivery within 7-10 business days.',
-      returnPolicy: product.return_policy || '7-day return policy. Items must be unused and in original packaging.',
+      shippingDetails: product.shipping_details || 'Free shipping on orders over $100. Standard delivery within 3-5 business days.',
+      returnPolicy: product.return_policy || '30-day return policy. Items must be unworn with original tags.',
       comparePrice: product.compare_price || null,
     }
   } catch (error) {
@@ -75,7 +75,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return {
-    title: `${product.name} | Artisan Haven`,
+    title: `${product.name} | VELURA`,
     description: product.shortDescription,
     openGraph: {
       title: product.name,
@@ -98,7 +98,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <Header />
       <main className="pt-24 min-h-screen">
         <ProductDetail product={product} />
-        <RelatedProducts currentProductId={product.id} artForm={product.artForm} />
+        <RelatedProducts currentProductId={product.id} category={product.category} />
       </main>
       <Footer />
     </>

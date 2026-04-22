@@ -3,15 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -24,8 +16,15 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { Plus, Search, Pencil, Trash2, FolderOpen, Loader2 } from "lucide-react"
+import { Plus, Search, Pencil, Trash2, FolderOpen, Loader2, Package, MoreHorizontal, GripVertical } from "lucide-react"
 import Image from "next/image"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface Category {
   id: number
@@ -173,6 +172,9 @@ export default function AdminCategoriesPage() {
       category.name?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  const totalProducts = categories.reduce((sum, cat) => sum + (cat.product_count || 0), 0)
+  const activeCategories = categories.filter(c => c.is_active).length
+
   const CategoryFormContent = ({ 
     category, 
     setCategory, 
@@ -184,20 +186,18 @@ export default function AdminCategoriesPage() {
   }) => (
     <div className="space-y-4">
       <div className="grid gap-2">
-        <Label htmlFor={`${isEdit ? 'edit' : 'new'}-name`}>Category Name *</Label>
+        <Label>Category Name *</Label>
         <Input
-          id={`${isEdit ? 'edit' : 'new'}-name`}
-          placeholder="e.g., Madhubani Art"
+          placeholder="e.g., T-Shirts, Hoodies, Jackets"
           value={category.name}
           onChange={(e) => setCategory({ ...category, name: e.target.value })}
         />
       </div>
       
       <div className="grid gap-2">
-        <Label htmlFor={`${isEdit ? 'edit' : 'new'}-description`}>Description</Label>
+        <Label>Description</Label>
         <Textarea
-          id={`${isEdit ? 'edit' : 'new'}-description`}
-          placeholder="Brief description of the category..."
+          placeholder="Brief description of this category..."
           rows={3}
           value={category.description}
           onChange={(e) => setCategory({ ...category, description: e.target.value })}
@@ -205,19 +205,32 @@ export default function AdminCategoriesPage() {
       </div>
       
       <div className="grid gap-2">
-        <Label htmlFor={`${isEdit ? 'edit' : 'new'}-image_url`}>Image URL</Label>
+        <Label>Cover Image URL</Label>
         <Input
-          id={`${isEdit ? 'edit' : 'new'}-image_url`}
-          placeholder="https://example.com/image.jpg"
+          placeholder="https://example.com/category-image.jpg"
           value={category.image_url}
           onChange={(e) => setCategory({ ...category, image_url: e.target.value })}
         />
+        {category.image_url && (
+          <div className="relative h-32 w-full rounded-lg overflow-hidden bg-muted mt-2">
+            <Image
+              src={category.image_url}
+              alt="Preview"
+              fill
+              className="object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement
+                target.src = PLACEHOLDER_IMAGE
+              }}
+            />
+          </div>
+        )}
       </div>
       
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-2">
         <div>
           <Label>Active</Label>
-          <p className="text-xs text-muted-foreground">Category visible on store</p>
+          <p className="text-xs text-muted-foreground">Show category in store navigation</p>
         </div>
         <Switch
           checked={category.is_active}
@@ -229,10 +242,11 @@ export default function AdminCategoriesPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">Categories</h1>
-          <p className="text-muted-foreground mt-1">Manage product categories</p>
+          <h1 className="text-2xl font-bold">Categories</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Organize your products into categories</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -241,18 +255,13 @@ export default function AdminCategoriesPage() {
               Add Category
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Category</DialogTitle>
-              <DialogDescription>
-                Create a new category for organizing products.
-              </DialogDescription>
+              <DialogDescription>Create a new category for your products.</DialogDescription>
             </DialogHeader>
-            <CategoryFormContent 
-              category={newCategory} 
-              setCategory={setNewCategory}
-            />
-            <DialogFooter className="mt-4">
+            <CategoryFormContent category={newCategory} setCategory={setNewCategory} />
+            <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} disabled={isSaving}>
                 Cancel
               </Button>
@@ -265,21 +274,69 @@ export default function AdminCategoriesPage() {
         </Dialog>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-violet-100">
+                <FolderOpen className="h-5 w-5 text-violet-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{categories.length}</p>
+                <p className="text-xs text-muted-foreground">Total Categories</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-100">
+                <Package className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{totalProducts}</p>
+                <p className="text-xs text-muted-foreground">Total Products</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-100">
+                <FolderOpen className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{activeCategories}</p>
+                <p className="text-xs text-muted-foreground">Active Categories</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search categories..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Category</DialogTitle>
-            <DialogDescription>
-              Update the category information below.
-            </DialogDescription>
+            <DialogDescription>Update the category information.</DialogDescription>
           </DialogHeader>
-          <CategoryFormContent 
-            category={editCategory} 
-            setCategory={setEditCategory}
-            isEdit
-          />
-          <DialogFooter className="mt-4">
+          <CategoryFormContent category={editCategory} setCategory={setEditCategory} isEdit />
+          <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isSaving}>
               Cancel
             </Button>
@@ -291,109 +348,86 @@ export default function AdminCategoriesPage() {
         </DialogContent>
       </Dialog>
 
-      <Card>
-        <CardHeader>
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search categories..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+      {/* Categories Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="aspect-[4/3] bg-muted rounded-lg animate-pulse" />
+          ))}
+        </div>
+      ) : filteredCategories.length === 0 ? (
+        <Card className="py-16">
+          <div className="text-center">
+            <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="font-medium text-lg">No categories found</h3>
+            <p className="text-muted-foreground text-sm mt-1">Create categories to organize your products</p>
+            <Button className="mt-4" onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Category
+            </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : filteredCategories.length === 0 ? (
-            <div className="text-center py-8">
-              <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No categories found</p>
-              <Button variant="outline" className="mt-4" onClick={() => setIsAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add your first category
-              </Button>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px]">Image</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Products</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCategories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell>
-                      <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-muted">
-                        {category.image_url ? (
-                          <Image
-                            src={category.image_url}
-                            alt={category.name || 'Category'}
-                            fill
-                            className="object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.src = PLACEHOLDER_IMAGE
-                            }}
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full w-full">
-                            <FolderOpen className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <p className="font-medium">{category.name}</p>
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-sm text-muted-foreground">{category.slug}</p>
-                    </TableCell>
-                    <TableCell>{category.product_count || 0}</TableCell>
-                    <TableCell>
-                      {category.is_active ? (
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
-                      ) : (
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Inactive</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditDialog(category)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDeleteCategory(category.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredCategories.map((category) => (
+            <Card key={category.id} className="group overflow-hidden">
+              <div className="relative aspect-[4/3] bg-muted">
+                {category.image_url ? (
+                  <Image
+                    src={category.image_url}
+                    alt={category.name || 'Category'}
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.src = PLACEHOLDER_IMAGE
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <FolderOpen className="h-12 w-12 text-muted-foreground/30" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h3 className="font-semibold text-white">{category.name}</h3>
+                  <p className="text-white/80 text-sm">{category.product_count || 0} products</p>
+                </div>
+                {!category.is_active && (
+                  <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded">
+                    Inactive
+                  </div>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => openEditDialog(category)}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="text-destructive"
+                      onClick={() => handleDeleteCategory(category.id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

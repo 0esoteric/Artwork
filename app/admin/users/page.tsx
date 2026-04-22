@@ -1,17 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,10 +26,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, MoreHorizontal, Eye, UserX, Shield, Mail, ShoppingBag } from "lucide-react"
+import { 
+  Search, 
+  MoreHorizontal, 
+  Eye, 
+  UserX, 
+  Shield, 
+  Mail, 
+  ShoppingBag,
+  Users,
+  UserCheck,
+  Calendar,
+  Package,
+  CreditCard
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
+// Mock data since users API might not exist
 const mockUsers = [
   {
     id: "1",
@@ -149,37 +155,33 @@ export default function AdminUsersPage() {
     setIsDetailsOpen(true)
   }
 
+  // Stats
+  const totalCustomers = mockUsers.filter(u => u.role === "customer").length
+  const activeUsers = mockUsers.filter(u => u.status === "active").length
+  const totalRevenue = mockUsers.reduce((sum, u) => sum + u.totalSpent, 0)
+  const avgOrderValue = totalRevenue / mockUsers.reduce((sum, u) => sum + u.totalOrders, 0) || 0
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-serif font-bold text-foreground">Users</h1>
-        <p className="text-muted-foreground mt-1">Manage customer and admin accounts</p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Customers</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Manage customer accounts and view activity</p>
+        </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Shield className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{mockUsers.filter(u => u.role === "admin").length}</p>
-                <p className="text-xs text-muted-foreground">Admins</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-100">
-                <ShoppingBag className="h-4 w-4 text-blue-700" />
+                <Users className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockUsers.filter(u => u.role === "customer").length}</p>
-                <p className="text-xs text-muted-foreground">Customers</p>
+                <p className="text-2xl font-bold">{totalCustomers}</p>
+                <p className="text-xs text-muted-foreground">Total Customers</p>
               </div>
             </div>
           </CardContent>
@@ -188,11 +190,11 @@ export default function AdminUsersPage() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-green-100">
-                <Mail className="h-4 w-4 text-green-700" />
+                <UserCheck className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockUsers.filter(u => u.status === "active").length}</p>
-                <p className="text-xs text-muted-foreground">Active</p>
+                <p className="text-2xl font-bold">{activeUsers}</p>
+                <p className="text-xs text-muted-foreground">Active Users</p>
               </div>
             </div>
           </CardContent>
@@ -200,136 +202,140 @@ export default function AdminUsersPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-red-100">
-                <UserX className="h-4 w-4 text-red-700" />
+              <div className="p-2 rounded-lg bg-violet-100">
+                <CreditCard className="h-5 w-5 text-violet-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockUsers.filter(u => u.status === "inactive").length}</p>
-                <p className="text-xs text-muted-foreground">Inactive</p>
+                <p className="text-2xl font-bold">{formatPrice(totalRevenue)}</p>
+                <p className="text-xs text-muted-foreground">Total Revenue</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-100">
+                <ShoppingBag className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{formatPrice(avgOrderValue)}</p>
+                <p className="text-xs text-muted-foreground">Avg. Order Value</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="customer">Customer</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Orders</TableHead>
-                <TableHead>Total Spent</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead className="w-[70px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9">
-                        <AvatarImage src={user.avatar || undefined} alt={user.name} />
-                        <AvatarFallback className="text-xs">{getInitials(user.name)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm">{user.phone}</TableCell>
-                  <TableCell>
-                    <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {user.status}
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="All Roles" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="admin">Admins</SelectItem>
+            <SelectItem value="customer">Customers</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Users List */}
+      <div className="space-y-3">
+        {filteredUsers.map((user) => (
+          <Card key={user.id} className="overflow-hidden hover:border-foreground/20 transition-colors">
+            <div className="p-4">
+              <div className="flex items-center gap-4">
+                {/* Avatar */}
+                <Avatar className="h-12 w-12 flex-shrink-0">
+                  <AvatarImage src={user.avatar || undefined} alt={user.name} />
+                  <AvatarFallback className="bg-muted">{getInitials(user.name)}</AvatarFallback>
+                </Avatar>
+
+                {/* User Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold truncate">{user.name}</p>
+                    {user.role === "admin" && (
+                      <Badge variant="default" className="flex items-center gap-1">
+                        <Shield className="h-3 w-3" />
+                        Admin
+                      </Badge>
+                    )}
+                    <span className={`h-2 w-2 rounded-full ${user.status === "active" ? "bg-green-500" : "bg-gray-300"}`} />
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Mail className="h-3.5 w-3.5" />
+                      {user.email}
                     </span>
-                  </TableCell>
-                  <TableCell>{user.totalOrders}</TableCell>
-                  <TableCell className="font-medium">{formatPrice(user.totalSpent)}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {formatDate(user.joinedAt)}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Actions</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openUserDetails(user)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <Shield className="h-4 w-4 mr-2" />
-                          Change Role
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
-                          <UserX className="h-4 w-4 mr-2" />
-                          Deactivate
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                    <span className="hidden sm:flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      Joined {formatDate(user.joinedAt)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="hidden md:flex items-center gap-6">
+                  <div className="text-center">
+                    <p className="font-bold">{user.totalOrders}</p>
+                    <p className="text-xs text-muted-foreground">Orders</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold">{formatPrice(user.totalSpent)}</p>
+                    <p className="text-xs text-muted-foreground">Spent</p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => openUserDetails(user)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Shield className="h-4 w-4 mr-2" />
+                      Change Role
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">
+                      <UserX className="h-4 w-4 mr-2" />
+                      Deactivate
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
 
       {/* User Details Dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
-            <DialogDescription>
-              Account information and activity
-            </DialogDescription>
+            <DialogTitle>Customer Details</DialogTitle>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-6">
+              {/* Profile */}
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
                   <AvatarImage src={selectedUser.avatar || undefined} alt={selectedUser.name} />
@@ -339,14 +345,14 @@ export default function AdminUsersPage() {
                   <h3 className="text-lg font-semibold">{selectedUser.name}</h3>
                   <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant={selectedUser.role === "admin" ? "default" : "secondary"}>
-                      {selectedUser.role}
-                    </Badge>
+                    {selectedUser.role === "admin" && (
+                      <Badge>Admin</Badge>
+                    )}
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         selectedUser.status === "active"
                           ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                          : "bg-gray-100 text-gray-600"
                       }`}
                     >
                       {selectedUser.status}
@@ -354,27 +360,37 @@ export default function AdminUsersPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Stats */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <p className="text-2xl font-bold">{selectedUser.totalOrders}</p>
-                  <p className="text-sm text-muted-foreground">Total Orders</p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <p className="text-2xl font-bold">{formatPrice(selectedUser.totalSpent)}</p>
-                  <p className="text-sm text-muted-foreground">Total Spent</p>
-                </div>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <Package className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-2xl font-bold">{selectedUser.totalOrders}</p>
+                    <p className="text-xs text-muted-foreground">Total Orders</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <CreditCard className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-2xl font-bold">{formatPrice(selectedUser.totalSpent)}</p>
+                    <p className="text-xs text-muted-foreground">Total Spent</p>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
+
+              {/* Details */}
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between py-2 border-b">
                   <span className="text-muted-foreground">Phone</span>
                   <span>{selectedUser.phone}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Joined</span>
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-muted-foreground">Member Since</span>
                   <span>{formatDate(selectedUser.joinedAt)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Last Login</span>
+                <div className="flex justify-between py-2">
+                  <span className="text-muted-foreground">Last Active</span>
                   <span>{formatDate(selectedUser.lastLogin)}</span>
                 </div>
               </div>

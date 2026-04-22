@@ -3,15 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,101 +27,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, MoreHorizontal, Eye, Package, Truck, CheckCircle, XCircle, Clock } from "lucide-react"
+import { 
+  Search, 
+  MoreHorizontal, 
+  Eye, 
+  Package, 
+  Truck, 
+  CheckCircle, 
+  XCircle, 
+  Clock,
+  MapPin,
+  Phone,
+  Mail,
+  Loader2,
+  ArrowUpRight,
+  Calendar,
+  CreditCard,
+  ShoppingBag
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
-const mockOrders = [
-  {
-    id: "ORD-2024-001",
-    customer: {
-      name: "Priya Sharma",
-      email: "priya@example.com",
-      phone: "+91 98765 43210",
-    },
-    items: [
-      { name: "Madhubani Peacock Painting", quantity: 1, price: 9500 },
-      { name: "Warli Art Frame", quantity: 2, price: 3000 },
-    ],
-    total: 15500,
-    status: "delivered",
-    paymentStatus: "paid",
-    shippingAddress: "123, MG Road, Bangalore, Karnataka - 560001",
-    createdAt: "2024-01-15T10:30:00",
-  },
-  {
-    id: "ORD-2024-002",
-    customer: {
-      name: "Rahul Verma",
-      email: "rahul@example.com",
-      phone: "+91 98765 43211",
-    },
-    items: [
-      { name: "Tanjore Krishna Painting", quantity: 1, price: 30000 },
-    ],
-    total: 30000,
-    status: "shipped",
-    paymentStatus: "paid",
-    shippingAddress: "456, Park Street, Kolkata, West Bengal - 700016",
-    createdAt: "2024-01-14T14:20:00",
-  },
-  {
-    id: "ORD-2024-003",
-    customer: {
-      name: "Anita Desai",
-      email: "anita@example.com",
-      phone: "+91 98765 43212",
-    },
-    items: [
-      { name: "Pattachitra Mythological", quantity: 1, price: 15000 },
-      { name: "Kalamkari Tree of Life", quantity: 1, price: 7500 },
-    ],
-    total: 22500,
-    status: "processing",
-    paymentStatus: "paid",
-    shippingAddress: "789, Marine Drive, Mumbai, Maharashtra - 400002",
-    createdAt: "2024-01-13T09:45:00",
-  },
-  {
-    id: "ORD-2024-004",
-    customer: {
-      name: "Vikram Singh",
-      email: "vikram@example.com",
-      phone: "+91 98765 43213",
-    },
-    items: [
-      { name: "Gond Art Elephant", quantity: 1, price: 8000 },
-    ],
-    total: 8000,
-    status: "pending",
-    paymentStatus: "pending",
-    shippingAddress: "101, Connaught Place, New Delhi - 110001",
-    createdAt: "2024-01-12T16:10:00",
-  },
-  {
-    id: "ORD-2024-005",
-    customer: {
-      name: "Meera Patel",
-      email: "meera@example.com",
-      phone: "+91 98765 43214",
-    },
-    items: [
-      { name: "Miniature Mughal Painting", quantity: 1, price: 25000 },
-    ],
-    total: 25000,
-    status: "cancelled",
-    paymentStatus: "refunded",
-    shippingAddress: "202, CG Road, Ahmedabad, Gujarat - 380006",
-    createdAt: "2024-01-11T11:25:00",
-  },
-]
 const statusConfig = {
-  pending: { label: "Pending", icon: Clock, color: "bg-yellow-100 text-yellow-700" },
-  confirmed: { label: "Confirmed", icon: CheckCircle, color: "bg-blue-100 text-blue-700" },
-  processing: { label: "Processing", icon: Package, color: "bg-indigo-100 text-indigo-700" },
-  shipped: { label: "Shipped", icon: Truck, color: "bg-purple-100 text-purple-700" },
-  delivered: { label: "Delivered", icon: CheckCircle, color: "bg-green-100 text-green-700" },
-  cancelled: { label: "Cancelled", icon: XCircle, color: "bg-red-100 text-red-700" },
-  refunded: { label: "Refunded", icon: XCircle, color: "bg-gray-100 text-gray-700" },
+  pending: { label: "Pending", icon: Clock, color: "bg-amber-50 text-amber-700 border-amber-200" },
+  confirmed: { label: "Confirmed", icon: CheckCircle, color: "bg-blue-50 text-blue-700 border-blue-200" },
+  processing: { label: "Processing", icon: Package, color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  shipped: { label: "Shipped", icon: Truck, color: "bg-purple-50 text-purple-700 border-purple-200" },
+  delivered: { label: "Delivered", icon: CheckCircle, color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  cancelled: { label: "Cancelled", icon: XCircle, color: "bg-red-50 text-red-700 border-red-200" },
+  refunded: { label: "Refunded", icon: XCircle, color: "bg-gray-50 text-gray-700 border-gray-200" },
 }
 
 export default function AdminOrdersPage() {
@@ -142,6 +67,7 @@ export default function AdminOrdersPage() {
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
   const [newStatus, setNewStatus] = useState("")
   const [newPaymentStatus, setNewPaymentStatus] = useState("")
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const fetchOrders = async () => {
     setIsLoading(true)
@@ -162,6 +88,7 @@ export default function AdminOrdersPage() {
 
   const handleUpdateStatus = async () => {
     if (!selectedOrder) return
+    setIsUpdating(true)
     try {
       const res = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
         method: 'PATCH',
@@ -177,14 +104,16 @@ export default function AdminOrdersPage() {
       }
     } catch (error) {
       console.error('Failed to update order status:', error)
+    } finally {
+      setIsUpdating(false)
     }
   }
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
-      order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.user_email.toLowerCase().includes(searchQuery.toLowerCase())
+      order.order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.user_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.user_email?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === "all" || order.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -208,10 +137,10 @@ export default function AdminOrdersPage() {
   }
 
   const getStatusBadge = (status: keyof typeof statusConfig) => {
-    const config = statusConfig[status]
+    const config = statusConfig[status] || statusConfig.pending
     const Icon = config.icon
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.color}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${config.color}`}>
         <Icon className="h-3 w-3" />
         {config.label}
       </span>
@@ -230,199 +159,241 @@ export default function AdminOrdersPage() {
     setIsStatusDialogOpen(true)
   }
 
+  // Count orders by status
+  const statusCounts = Object.keys(statusConfig).reduce((acc, status) => {
+    acc[status] = orders.filter(o => o.status === status).length
+    return acc
+  }, {} as Record<string, number>)
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-serif font-bold text-foreground">Orders</h1>
-        <p className="text-muted-foreground mt-1">Manage and track customer orders</p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Orders</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Track and manage customer orders</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            Export
+            <ArrowUpRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+      {/* Status Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <Button
+          variant={statusFilter === "all" ? "secondary" : "ghost"}
+          size="sm"
+          onClick={() => setStatusFilter("all")}
+          className="whitespace-nowrap"
+        >
+          All Orders
+          <Badge variant="secondary" className="ml-2">{orders.length}</Badge>
+        </Button>
         {Object.entries(statusConfig).map(([key, config]) => {
-          const count = orders.filter((o) => o.status === key).length
+          const count = statusCounts[key] || 0
+          if (count === 0) return null
           const Icon = config.icon
           return (
-            <Card key={key} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setStatusFilter(key)}>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${config.color}`}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{count}</p>
-                    <p className="text-xs text-muted-foreground">{config.label}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <Button
+              key={key}
+              variant={statusFilter === key ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setStatusFilter(key)}
+              className="whitespace-nowrap"
+            >
+              <Icon className="h-4 w-4 mr-1.5" />
+              {config.label}
+              <Badge variant="secondary" className="ml-2">{count}</Badge>
+            </Button>
           )
         })}
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search orders..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                {Object.entries(statusConfig).map(([key, config]) => (
-                  <SelectItem key={key} value={key}>
-                    {config.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search by order ID, customer name or email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      {/* Orders List */}
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="h-24 bg-muted rounded-lg animate-pulse" />
+          ))}
+        </div>
+      ) : filteredOrders.length === 0 ? (
+        <Card className="py-16">
+          <div className="text-center">
+            <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="font-medium text-lg">No orders found</h3>
+            <p className="text-muted-foreground text-sm mt-1">Orders will appear here when customers place them</p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Payment</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-[70px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.order_number}</TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{order.user_name}</p>
-                      <p className="text-xs text-muted-foreground">{order.user_email}</p>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {filteredOrders.map((order) => (
+            <Card key={order.id} className="overflow-hidden hover:border-foreground/20 transition-colors">
+              <div className="p-4">
+                <div className="flex items-start gap-4">
+                  {/* Order Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="font-semibold">{order.order_number}</span>
+                      {getStatusBadge(order.status as keyof typeof statusConfig)}
+                      <Badge variant={order.payment_status === "paid" ? "default" : "outline"}>
+                        {order.payment_status}
+                      </Badge>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <p className="text-sm font-medium">{order.payment_method?.toUpperCase()}</p>
-                  </TableCell>
-                  <TableCell className="font-medium">{formatPrice(order.total)}</TableCell>
-                  <TableCell>{getStatusBadge(order.status as keyof typeof statusConfig)}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={order.payment_status === "paid" ? "default" : order.payment_status === "refunded" ? "secondary" : "outline"}
-                    >
-                      {order.payment_status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {formatDate(order.created_at)}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Actions</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openOrderDetails(order)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => openStatusDialog(order)}>
-                          <Package className="h-4 w-4 mr-2" />
-                          Update Status
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {formatDate(order.created_at)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <CreditCard className="h-3.5 w-3.5" />
+                        {order.payment_method?.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Customer */}
+                  <div className="hidden md:block text-right">
+                    <p className="font-medium">{order.user_name}</p>
+                    <p className="text-sm text-muted-foreground">{order.user_email}</p>
+                  </div>
+
+                  {/* Total */}
+                  <div className="text-right">
+                    <p className="font-bold text-lg">{formatPrice(order.total)}</p>
+                  </div>
+
+                  {/* Actions */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openOrderDetails(order)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => openStatusDialog(order)}>
+                        <Package className="h-4 w-4 mr-2" />
+                        Update Status
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Order Details Dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Order Details - {selectedOrder?.order_number}</DialogTitle>
+            <DialogTitle className="flex items-center gap-3">
+              Order {selectedOrder?.order_number}
+              {selectedOrder && getStatusBadge(selectedOrder.status as keyof typeof statusConfig)}
+            </DialogTitle>
             <DialogDescription>
-              Created on {selectedOrder && formatDate(selectedOrder.created_at)}
+              Placed on {selectedOrder && formatDate(selectedOrder.created_at)}
             </DialogDescription>
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Customer</h4>
-                  <p className="font-medium">{selectedOrder.user_name}</p>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.user_email}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Shipping Information</h4>
-                  <p className="font-medium">{selectedOrder.shipping_name}</p>
-                  <p className="text-sm">{selectedOrder.shipping_address}</p>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.shipping_phone}</p>
-                </div>
+              {/* Customer & Shipping */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Customer
+                    </h4>
+                    <p className="font-medium">{selectedOrder.user_name}</p>
+                    <p className="text-sm text-muted-foreground">{selectedOrder.user_email}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Shipping Address
+                    </h4>
+                    <p className="font-medium">{selectedOrder.shipping_name}</p>
+                    <p className="text-sm">{selectedOrder.shipping_address}</p>
+                    {selectedOrder.shipping_phone && (
+                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                        <Phone className="h-3 w-3" />
+                        {selectedOrder.shipping_phone}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
               
               {/* Order Items */}
               {selectedOrder.items && selectedOrder.items.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Order Items</h4>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {selectedOrder.items.map((item: any) => (
-                      <div key={item.id} className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
-                        <div className="w-10 h-10 rounded bg-muted flex items-center justify-center flex-shrink-0">
-                          <Package className="h-5 w-5 text-muted-foreground" />
+                  <h4 className="text-sm font-medium text-muted-foreground mb-3">Order Items</h4>
+                  <Card>
+                    <div className="divide-y">
+                      {selectedOrder.items.map((item: any) => (
+                        <div key={item.id} className="flex items-center gap-4 p-4">
+                          <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                            <Package className="h-6 w-6 text-muted-foreground/50" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium">{item.product_name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Qty: {item.quantity} x {formatPrice(item.price)}
+                            </p>
+                          </div>
+                          <p className="font-semibold">{formatPrice(item.total)}</p>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{item.product_name}</p>
-                          <p className="text-xs text-muted-foreground">Qty: {item.quantity} x {formatPrice(item.price)}</p>
-                        </div>
-                        <p className="font-medium text-sm">{formatPrice(item.total)}</p>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  </Card>
                 </div>
               )}
               
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Total Amount</h4>
-                  <p className="text-lg font-bold">{formatPrice(selectedOrder.total)}</p>
-                </div>
-                <div className="text-right">
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Payment Method</h4>
-                  <p className="font-medium uppercase">{selectedOrder.payment_method}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-8 pt-4 border-t">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Order Status</h4>
-                  {getStatusBadge(selectedOrder.status as keyof typeof statusConfig)}
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Payment Status</h4>
-                  <Badge
-                    variant={selectedOrder.payment_status === "paid" ? "default" : selectedOrder.payment_status === "refunded" ? "secondary" : "outline"}
-                  >
-                    {selectedOrder.payment_status}
-                  </Badge>
-                </div>
+              {/* Order Summary */}
+              <Card className="bg-muted/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Amount</p>
+                      <p className="text-2xl font-bold">{formatPrice(selectedOrder.total)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Payment Method</p>
+                      <p className="font-medium uppercase">{selectedOrder.payment_method}</p>
+                      <Badge className="mt-1" variant={selectedOrder.payment_status === "paid" ? "default" : "outline"}>
+                        {selectedOrder.payment_status}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => openStatusDialog(selectedOrder)}>
+                  Update Status
+                </Button>
               </div>
             </div>
           )}
@@ -440,7 +411,7 @@ export default function AdminOrdersPage() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="newStatus">Order Status</Label>
+              <Label>Order Status</Label>
               <Select value={newStatus} onValueChange={setNewStatus}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
@@ -448,14 +419,17 @@ export default function AdminOrdersPage() {
                 <SelectContent>
                   {Object.entries(statusConfig).map(([key, config]) => (
                     <SelectItem key={key} value={key}>
-                      {config.label}
+                      <div className="flex items-center gap-2">
+                        <config.icon className="h-4 w-4" />
+                        {config.label}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="newPaymentStatus">Payment Status</Label>
+              <Label>Payment Status</Label>
               <Select value={newPaymentStatus} onValueChange={setNewPaymentStatus}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select payment status" />
@@ -473,8 +447,9 @@ export default function AdminOrdersPage() {
             <Button variant="outline" onClick={() => setIsStatusDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleUpdateStatus}>
-              Update Order
+            <Button onClick={handleUpdateStatus} disabled={isUpdating}>
+              {isUpdating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Update Status
             </Button>
           </DialogFooter>
         </DialogContent>
